@@ -24,7 +24,7 @@ var operation = flag.String("op", "encode", "encode or decode")
 // the bitmask we will use (last two bits)
 var lsbMask = ^(uint32(3))
 
-//helper to dry error handling up
+// Helper for error handling
 func panicOnError(e error) {
 	if e != nil {
 		panic(e)
@@ -40,110 +40,102 @@ func main() {
 	switch *operation {
 	case "encode":
 		fmt.Println("encoding!")
-		// read the input file
-		inputReader, inputErr := os.Open(*inputFilename)
-		// panic on an error
-		panicOnError(inputErr)
-		// close the reader
-		defer inputReader.Close()
 
-		// read the input message file
-		message, inputMessageErr := ioutil.ReadFile(*messageFilename)
-		// panic on an error
-		panicOnError(inputMessageErr)
+		inputReader, inputErr := os.Open(*inputFilename) // read the input file
+		panicOnError(inputErr)                           // panic on an error
+		defer inputReader.Close()                        // close the reader
 
-		// decode the image
-		img, _, imageDecodeErr := image.Decode(inputReader)
-		// panic if image isn't decoded
-		panicOnError(imageDecodeErr)
-		// get the bounds of the image
-		bounds := img.Bounds()
-		// create output image
-		outputImage := image.NewNRGBA64(img.Bounds())
-		// get the rows and columns of the image
-		var messageIndex = 0
-		// loop over rows
-		for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-			// loop over columns
-			for x := bounds.Min.X; x < bounds.Max.X; x++ {
-				// get the rgba values from the input image
-				r, g, b, a := img.At(x, y).RGBA()
-				// if we have bytes in message
-				if messageIndex < len(message) {
-					// first two bits
-					newr := uint32(message[messageIndex]>>6) + (r & lsbMask)
-					// second two bits
-					newg := uint32(message[messageIndex]>>4) & ^lsbMask + (g & lsbMask)
-					// third two bits
-					newb := uint32(message[messageIndex]>>2) & ^lsbMask + (b & lsbMask)
-					// last two bits
-					newa := uint32(message[messageIndex]) & ^lsbMask + (a & lsbMask)
+		message, inputMessageErr := ioutil.ReadFile(*messageFilename) // read the input message file
+		panicOnError(inputMessageErr)                                 // panic on an erro
+
+		img, _, imageDecodeErr := image.Decode(inputReader) // decode the image
+		panicOnError(imageDecodeErr)                        // panic if image isn't decoded
+
+		bounds := img.Bounds() // get the bounds of the image
+
+		outputImage := image.NewNRGBA64(img.Bounds()) // create output image
+
+		var messageIndex = 0 // get the rows and columns of the image
+
+		for y := bounds.Min.Y; y < bounds.Max.Y; y++ { // loop over rows
+			for x := bounds.Min.X; x < bounds.Max.X; x++ { // loop over columns
+
+				r, g, b, a := img.At(x, y).RGBA() // get the rgba values from the input image
+
+				if messageIndex < len(message) { // if we have bytes in message
+
+					newr := uint32(message[messageIndex]>>6) + (r & lsbMask) // first two bits (R)
+
+					newg := uint32(message[messageIndex]>>4) & ^lsbMask + (g & lsbMask) // second two bits (G)
+
+					newb := uint32(message[messageIndex]>>2) & ^lsbMask + (b & lsbMask) // third two bits (B)
+
+					newa := uint32(message[messageIndex]) & ^lsbMask + (a & lsbMask) // last two bits (A - alfa)
 					messageIndex++
-					// set the color in the new output image
-					outputImage.SetNRGBA64(x, y, color.NRGBA64{uint16(newr), uint16(newg), uint16(newb), uint16(newa)})
+
+					outputImage.SetNRGBA64(x, y, color.NRGBA64{uint16(newr), uint16(newg), uint16(newb), uint16(newa)}) // set the color in the new output image
 				} else if messageIndex == len(message) {
 					// if we are done with our message bytes
 					messageIndex++
-					// set a null ascii char to know if we are done
-					outputImage.SetNRGBA64(x, y, color.NRGBA64{uint16(0), uint16(0), uint16(0), uint16(0)})
+
+					outputImage.SetNRGBA64(x, y, color.NRGBA64{uint16(0), uint16(0), uint16(0), uint16(0)}) // set a null ascii char to know if we are done
 				} else {
-					// otherwise, just put the exact values in the new image
-					outputImage.SetNRGBA64(x, y, color.NRGBA64{uint16(r), uint16(g), uint16(b), uint16(a)})
+					outputImage.SetNRGBA64(x, y, color.NRGBA64{uint16(r), uint16(g), uint16(b), uint16(a)}) // otherwise, just put the exact values in the new image
 				}
 			}
 		}
-		// we obviously have more data that won't fit in the image
-		if messageIndex < len(message) {
+
+		if messageIndex < len(message) { // We have more data then what can fit the image
 			panicOnError(errors.New("out of space in input image"))
 		}
 
-		// write the new file out
-		outputWriter, outputErr := os.Create(*outputFilename)
-		// panic if fails..
-		panicOnError(outputErr)
-		// close output file when donw
-		defer outputWriter.Close()
-		// encode the png
-		png.Encode(outputWriter, outputImage)
-		// operation was decode that we passed in
+		outputWriter, outputErr := os.Create(*outputFilename) // write the new file out
+
+		panicOnError(outputErr) // Panic if there is an error
+
+		defer outputWriter.Close() // Close output writer
+
+		png.Encode(outputWriter, outputImage) // Png encode the writer
 
 	case "decode":
 		fmt.Println("decoding!")
-		// read the input file
-		inputReader, inputErr := os.Open(*inputFilename)
-		// panic on an error
-		panicOnError(inputErr)
-		// close the reader
-		defer inputReader.Close()
-		// decode the image
-		img, _, imageDecodeErr := image.Decode(inputReader)
-		// panic if image isn't decoded
-		panicOnError(imageDecodeErr)
-		// get the bounds of the image
-		bounds := img.Bounds()
+
+		inputReader, inputErr := os.Open(*inputFilename) // read the input file
+		panicOnError(inputErr)                           // panic on an error
+		defer inputReader.Close()                        // close the reader
+
+		img, _, imageDecodeErr := image.Decode(inputReader) // decode the image
+		panicOnError(imageDecodeErr)                        // panic if image isn't decoded
+
+		bounds := img.Bounds() // get the bounds of the image
+
 		// get the rows and columns of the image
 		// loop over rows we will break here if done reading message
 	OUTER:
 		for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 			// loop over columns
 			for x := bounds.Min.X; x < bounds.Max.X; x++ {
+
 				// get the rgba values from the input image
 				c := img.At(x, y).(color.NRGBA64)
 				r := uint32(c.R)
 				g := uint32(c.G)
 				b := uint32(c.B)
 				a := uint32(c.A)
+
 				// build the byte from the color lsbs
 				ch := (r & ^lsbMask) << 6
 				ch += (g & ^lsbMask) << 4
 				ch += (b & ^lsbMask) << 2
 				ch += (a & ^lsbMask)
+
 				// if we come across a zero byte
 				if ch == 0 {
 					break OUTER
 				}
-				// if the char is valid ascii print it out
-				if ch >= 32 && ch <= 126 {
+
+				// If the char is valid ascii print it out
+				if (ch >= 32 && ch <= 126) || ch == '\n' {
 					fmt.Printf("%c", ch)
 				}
 			}

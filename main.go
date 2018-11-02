@@ -27,10 +27,10 @@ func main() {
 	switch *operation {
 	case "encode":
 		fmt.Println("encoding!")
-		encode()
+		encode(inputFilename, messageFilename)
 
 	case "decode":
 		fmt.Println("decoding!")
-		decode()
+		decode(inputFilename)
 	}
 }

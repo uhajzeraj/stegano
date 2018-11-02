@@ -7,13 +7,16 @@ import (
 	"os"
 )
 
-func decode() {
-	inputReader, inputErr := os.Open(*inputFilename) // read the input file
-	panicOnError(inputErr)                           // panic on an error
-	defer inputReader.Close()                        // close the reader
+func decode(inputFile *string) {
+	inputReader, err := os.Open(*inputFile) // read the input file
+	if err != nil {
+		panic(err)
+	}
 
-	img, _, imageDecodeErr := image.Decode(inputReader) // decode the image
-	panicOnError(imageDecodeErr)                        // panic if image isn't decoded
+	img, _, err := image.Decode(inputReader) // decode the image
+	if err != nil {
+		panic(err)
+	}
 
 	bounds := img.Bounds() // get the bounds of the image
 
@@ -51,4 +54,8 @@ LoopBreak:
 	}
 	// newline
 	fmt.Printf("\n")
+	err = inputReader.Close() // close the reader
+	if err != nil {
+		panic(err)
+	}
 }

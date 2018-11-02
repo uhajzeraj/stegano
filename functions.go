@@ -4,16 +4,16 @@ import (
 	"strings"
 )
 
-// Helper for error handling
-func panicOnError(e error) {
-	if e != nil {
-		panic(e)
+// Damn you gometalinter and your cyclomatic complexity
+func errorPanic(err error) {
+	if err != nil {
+		panic(err)
 	}
 }
 
 // Output file name
-func outputName(inputFN *string) string {
-	output := *inputFN
+func outputName(inputFN string) string {
+	output := inputFN
 
 	len := len("images/plain/") // Count the characters, and remove it using the `slice cutter`
 

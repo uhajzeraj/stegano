@@ -11,16 +11,18 @@ import (
 )
 
 // Encoding function
-func encode() {
-	inputReader, inputErr := os.Open(*inputFilename) // read the input file
-	panicOnError(inputErr)                           // panic on an error
-	defer inputReader.Close()                        // close the reader
+func encode(inputFile *string, messageFile *string) {
+	inputReader, err := os.Open(*inputFile) // read the input file
+	errorPanic(err)
 
-	message, inputMessageErr := ioutil.ReadFile(*messageFilename) // read the input message file
-	panicOnError(inputMessageErr)                                 // panic on an erro
+	message, err := ioutil.ReadFile(*messageFile) // read the input message file
+	errorPanic(err)
 
-	img, _, imageDecodeErr := image.Decode(inputReader) // decode the image
-	panicOnError(imageDecodeErr)                        // panic if image isn't decoded
+	img, _, err := image.Decode(inputReader) // decode the image
+	errorPanic(err)
+
+	err = inputReader.Close() // close the reader
+	errorPanic(err)
 
 	bounds := img.Bounds()                        // get the bounds of the image
 	outputImage := image.NewNRGBA64(img.Bounds()) // create output image
@@ -28,7 +30,7 @@ func encode() {
 	var messageIndex = 0 // get the rows and columns of the image
 
 	fmt.Printf("The message is %d characters long\n", len(message))
-	fmt.Println(bounds.Size().X * bounds.Size().Y)
+	fmt.Printf("The image can store %d characters\n", bounds.Size().X*bounds.Size().Y)
 
 	totalPixels := bounds.Size().X * bounds.Size().Y // Get the total number of pixels in the image
 
@@ -60,17 +62,19 @@ func encode() {
 	}
 
 	if messageIndex < len(message) { // We have more data then what can fit the image
-		panicOnError(errors.New("out of space in input image"))
+		panic(errors.New("out of space in input image"))
 	}
 
-	outName := outputName(inputFilename)
+	inputName := *inputFile
 
-	outputWriter, outputErr := os.Create(outName) // write the new file out
-	panicOnError(outputErr)                       // Panic if there is an error
-	defer outputWriter.Close()                    // Close output writer
+	outName := outputName(inputName)
 
-	err := png.Encode(outputWriter, outputImage) // Png encode the writer
-	if err != nil {
-		panic(err)
-	}
+	outputWriter, err := os.Create(outName) // write the new file out
+	errorPanic(err)
+
+	err = png.Encode(outputWriter, outputImage) // Png encode the writer
+	errorPanic(err)
+
+	err = outputWriter.Close() // Close output writer
+	errorPanic(err)
 }

@@ -5,10 +5,15 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	_ "image/gif"
+	_ "image/jpeg"
 	"image/png"
 	"io/ioutil"
 	"os"
 )
+
+// the bitmask we will use (last two bits)
+var lsbMask = ^(uint32(3))
 
 // Encoding function
 func encode(inputFile *string, messageFile *string) error {

@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/gorilla/mux"
 )
@@ -16,6 +17,30 @@ import (
 var inputFilename = flag.String("in", "", "input image file")
 var messageFilename = flag.String("msg", "", "message input file")
 var operation = flag.String("op", "encode", "encode or decode")
+
+type User struct {
+	Username string
+	Password string
+	Errors   map[string]string
+}
+
+//Validate is used
+func (usr *User) Validate() bool {
+	usr.Errors = make(map[string]string)
+
+	re := regexp.MustCompile(".+@.+\\..+")
+	matched := re.Match([]byte(usr.Username))
+	if matched == false {
+		usr.Errors["Username"] = "Please enter a valid email address"
+	}
+	// re1 := regexp.MustCompile("^(?=.*[A-Z].*[A-Z])(?=.*[!@#$&*])(?=.*[0-9].*[0-9])(?=.*[a-z].*[a-z].*[a-z]).{8}")
+	// matched1 := re1.Match([]byte(usr.Password))
+	if usr.Password == "" {
+		usr.Errors["Password"] = "Password is not strong"
+	}
+
+	return len(usr.Errors) == 0
+}
 
 func main() {
 
@@ -60,7 +85,18 @@ func main() {
 	// Create a router
 	r := mux.NewRouter()
 
+	// muxs := pat.New()
+	// muxs.Get("/", http.HandlerFunc(index))
+	// muxs.Get("/login.html", http.HandlerFunc(login))
+	// muxs.Get("/signup.html", http.HandlerFunc(signup))
+	// muxs.Post("/login.html", http.HandlerFunc(signin))
+
 	r.HandleFunc("/", index).Methods("GET")
+	r.HandleFunc("/login.html", login).Methods("GET")
+	r.HandleFunc("/signup.html", signup).Methods("GET")
+	r.HandleFunc("/login.html", signin).Methods("POST")
+	r.HandleFunc("/signup.html", signup).Methods("GET")
+	r.HandleFunc("/home.html", home).Methods("GET")
 
 	// srv := &http.Server{
 	// 	Handler: r,
@@ -71,16 +107,36 @@ func main() {
 	// }
 	// log.Fatal(srv.ListenAndServe())
 
-	if err := http.ListenAndServe(":8081", r); err != nil {
+	if err := http.ListenAndServe(":8080", r); err != nil {
 		log.Fatal(err)
 	}
 
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	render(w, "templates/index.html", nil)
+	render(w, "front-end/index.html", nil)
+}
+func login(w http.ResponseWriter, r *http.Request) {
+	render(w, "front-end/login.html", nil)
+}
+func signup(w http.ResponseWriter, r *http.Request) {
+	render(w, "front-end/signup.html", nil)
 }
 
+func home(w http.ResponseWriter, r *http.Request) {
+	render(w, "front-end/home.html", nil)
+}
+
+func signin(w http.ResponseWriter, r *http.Request) {
+	usr := &User{
+		Username: r.FormValue("username"),
+		Password: r.FormValue("password"),
+	}
+	if usr.Validate() == false {
+		render(w, "front-end/login.html", nil)
+	}
+	http.Redirect(w, r, "/home.html", http.StatusSeeOther)
+}
 func render(w http.ResponseWriter, filename string, data interface{}) {
 	tmpl, err := template.ParseFiles(filename)
 	if err != nil {

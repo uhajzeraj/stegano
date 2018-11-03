@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
-	"time"
+
+	"github.com/gorilla/mux"
 )
 
 // example encode usage: go run png-lsb-steg.go -operation encode -image-input-file test.png -image-output-file steg.png -message-input-file hide.txt
@@ -56,15 +58,35 @@ func main() {
 	// }
 
 	// Create a router
-	r := newRouter()
+	r := mux.NewRouter()
 
-	srv := &http.Server{
-		Handler: r,
-		Addr:    "127.0.0.1:8080",
-		// Good practice: enforce timeouts for servers you create!
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
+	r.HandleFunc("/", index).Methods("GET")
+
+	// srv := &http.Server{
+	// 	Handler: r,
+	// 	Addr:    "127.0.0.1:8080",
+	// 	// Good practice: enforce timeouts for servers you create!
+	// 	WriteTimeout: 15 * time.Second,
+	// 	ReadTimeout:  15 * time.Second,
+	// }
+	// log.Fatal(srv.ListenAndServe())
+
+	if err := http.ListenAndServe(":8081", r); err != nil {
+		log.Fatal(err)
 	}
 
-	log.Fatal(srv.ListenAndServe())
+}
+
+func index(w http.ResponseWriter, r *http.Request) {
+	render(w, "templates/index.html", nil)
+}
+
+func render(w http.ResponseWriter, filename string, data interface{}) {
+	tmpl, err := template.ParseFiles(filename)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	if err := tmpl.Execute(w, data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }

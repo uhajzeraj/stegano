@@ -17,11 +17,28 @@ var operation = flag.String("op", "encode", "encode or decode")
 
 func main() {
 
-	// Connect to mongo before doing anything
-	_, err := mongoConnect()
-	if err != nil {
-		panic(err)
-	}
+	// // Connect to mongo before doing anything
+	// client, err := mongoConnect()
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// img, err := getImage(client)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// fmt.Println(img["imgEncoding"])
+
+	// path := "assets/images/plain/rick_morty.jpg"
+
+	// encoding, err := image64Encode(path)
+
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// storeImage(client, encoding)
 
 	// // parse the command line options
 	// flag.Parse()

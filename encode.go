@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"image"
@@ -12,7 +14,7 @@ import (
 	"os"
 )
 
-// the bitmask we will use (last two bits)
+// The bitmask that will be used (last two bits)
 var lsbMask = ^(uint32(3))
 
 // Encoding function
@@ -80,4 +82,24 @@ func encode(inputFile *string, messageFile *string) error {
 	errorPanic(err)
 
 	return nil
+}
+
+// Base64 encode the image
+func image64Encode(path string) (string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+
+	// Read entire JPG into byte slice
+	reader := bufio.NewReader(f)
+	content, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return "", err
+	}
+
+	// Encode as base64
+	encoded := base64.StdEncoding.EncodeToString(content)
+
+	return encoded, nil
 }

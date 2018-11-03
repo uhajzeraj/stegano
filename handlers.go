@@ -20,6 +20,12 @@ func newRouter() *mux.Router {
 	return r
 }
 
+// Test struct for testing
+type Test struct {
+	Title     string
+	ImgEncode string
+}
+
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
@@ -28,7 +34,18 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	t.Execute(w, nil)
+	// Connect to mongo before doing anything
+	client, err := mongoConnect()
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = getImage(client)
+	if err != nil {
+		panic(err)
+	}
+
+	t.Execute(w, Test{"Best page title", `assets/images/plain/smaller_image.jpeg`})
 
 	// fmt.Fprintf(w, "Hello world!")
 }

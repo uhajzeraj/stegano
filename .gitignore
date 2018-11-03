@@ -1,5 +1,5 @@
-images/
-text/
+assets/images/
+assets/text/
 stegano
 test/
 decode_test.go

@@ -12,5 +12,9 @@ func Test_encode(t *testing.T) {
 	inputFile := &inputFileString
 	messageFile := &messageFileString
 
-	encode(inputFile, messageFile)
+	err := encode(inputFile, messageFile)
+
+	if err != nil {
+		t.Error("Something went wrong", err)
+	}
 }

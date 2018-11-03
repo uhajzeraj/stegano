@@ -1,3 +1,8 @@
 images/
 text/
 stegano
+test/
+decode_test.go
+encode_test.go
+functions_test.go
+mongo_test.go

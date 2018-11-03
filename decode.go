@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func decode(inputFile *string) {
+func decode(inputFile *string) error {
 	inputReader, err := os.Open(*inputFile) // read the input file
 	if err != nil {
 		panic(err)
@@ -22,8 +22,10 @@ func decode(inputFile *string) {
 
 	// get the rows and columns of the image
 	// loop over rows we will break here if done reading message
+	stringOutput := ""
+
 LoopBreak:
-	// fmt.Println("Is it coming here")
+
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		// loop over columns
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
@@ -49,6 +51,7 @@ LoopBreak:
 			// If the char is valid ascii print it out
 			if (ch >= 32 && ch <= 126) || ch == '\n' {
 				fmt.Printf("%c", ch)
+				stringOutput += string(ch)
 			}
 		}
 	}
@@ -58,4 +61,7 @@ LoopBreak:
 	if err != nil {
 		panic(err)
 	}
+
+	saveFile(outputName(*inputFile), stringOutput)
+	return nil
 }

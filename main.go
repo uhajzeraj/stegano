@@ -21,16 +21,24 @@ var lsbMask = ^(uint32(3))
 // main, based on operation flag will encode data into image, or decode data from an image
 func main() {
 
+	// Connect to mongo before doing anything
+	_, err := mongoConnect()
+	if err != nil {
+		panic(err)
+	}
+
 	// parse the command line options
 	flag.Parse()
 
 	switch *operation {
 	case "encode":
 		fmt.Println("encoding!")
-		encode(inputFilename, messageFilename)
+		err := encode(inputFilename, messageFilename)
+		errorPanic(err)
 
 	case "decode":
 		fmt.Println("decoding!")
-		decode(inputFilename)
+		err := decode(inputFilename)
+		errorPanic(err)
 	}
 }

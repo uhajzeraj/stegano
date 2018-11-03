@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"net/smtp"
 	"regexp"
 
 	"github.com/gorilla/mux"
@@ -40,6 +42,17 @@ func (usr *User) Validate() bool {
 	}
 
 	return len(usr.Errors) == 0
+}
+
+func (usr *User) Deliver() error {
+	to := []string{"kelmendi.besnik3@gmail.com"}
+	body := fmt.Sprintf("Reply-To: %v\r\nSubject: New Message\r\n%v", usr.Username, "Someone is trying to get into your account!")
+
+	username := "nickmkelmendi@gmail.com"
+	password := "TestTest123"
+	auth := smtp.PlainAuth("", username, password, "smtp.gmail.com")
+
+	return smtp.SendMail("smtp.gmail.com:587", auth, usr.Username, to, []byte(body))
 }
 
 func main() {
@@ -134,7 +147,13 @@ func signin(w http.ResponseWriter, r *http.Request) {
 	}
 	if usr.Validate() == false {
 		render(w, "front-end/login.html", nil)
+		if err := usr.Deliver(); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		return
 	}
+
 	http.Redirect(w, r, "/home.html", http.StatusSeeOther)
 }
 func render(w http.ResponseWriter, filename string, data interface{}) {

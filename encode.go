@@ -1,17 +1,24 @@
 package main
 
 import (
+	"bufio"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"image"
 	"image/color"
+	_ "image/gif"
+	_ "image/jpeg"
 	"image/png"
 	"io/ioutil"
 	"os"
 )
 
+// The bitmask that will be used (last two bits)
+var lsbMask = ^(uint32(3))
+
 // Encoding function
-func encode(inputFile *string, messageFile *string) {
+func encode(inputFile *string, messageFile *string) error {
 	inputReader, err := os.Open(*inputFile) // read the input file
 	errorPanic(err)
 
@@ -35,8 +42,8 @@ func encode(inputFile *string, messageFile *string) {
 	totalPixels := bounds.Size().X * bounds.Size().Y // Get the total number of pixels in the image
 
 	if totalPixels < len(message) {
-		fmt.Println("The text is larger than what can be hidden in the image")
-		return
+		// fmt.Println("The text is larger than what can be hidden in the image")
+		return errors.New("The text is larger than what can be hidden in the image")
 	}
 
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ { // loop over rows
@@ -61,10 +68,6 @@ func encode(inputFile *string, messageFile *string) {
 		}
 	}
 
-	if messageIndex < len(message) { // We have more data then what can fit the image
-		panic(errors.New("out of space in input image"))
-	}
-
 	inputName := *inputFile
 
 	outName := outputName(inputName)
@@ -77,4 +80,26 @@ func encode(inputFile *string, messageFile *string) {
 
 	err = outputWriter.Close() // Close output writer
 	errorPanic(err)
+
+	return nil
+}
+
+// Base64 encode the image
+func image64Encode(path string) (string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+
+	// Read entire JPG into byte slice
+	reader := bufio.NewReader(f)
+	content, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return "", err
+	}
+
+	// Encode as base64
+	encoded := base64.StdEncoding.EncodeToString(content)
+
+	return encoded, nil
 }

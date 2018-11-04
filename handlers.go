@@ -7,6 +7,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Test struct for testing
+type Test struct {
+	Title     string
+	ImgEncode string
+}
+
 // Wrap mux router in a function for testing
 func newRouter() *mux.Router {
 	r := mux.NewRouter()
@@ -18,12 +24,6 @@ func newRouter() *mux.Router {
 	r.PathPrefix("/assets/").Handler(staticFileHadler).Methods("GET")
 
 	return r
-}
-
-// Test struct for testing
-type Test struct {
-	Title     string
-	ImgEncode string
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {

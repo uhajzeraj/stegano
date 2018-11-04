@@ -75,7 +75,7 @@
             
               <div style="max-width: 650px; margin: auto;">
               
-                <form id="upload-image-form" action="" method="post" enctype="multipart/form-data">
+                <form id="upload-image-form" action="/submit" method="post" enctype="multipart/form-data" name="enc">
                   <div id="image-preview-div" style="display: none">
                     <label for="exampleInputFile">Selected image:</label>
                     <br>
@@ -84,7 +84,9 @@
                   <div class="form-group">
                     <input type="file" name="file" id="file" required>
                   </div>
-                  <button class="btn btn-lg btn-primary" id="upload-button" type="submit" disabled>Upload image</button>
+                  <label for="comment" style="font-weight:bold;">Plaintext:</label>
+                  <textarea class="form-control" rows="5" id="text" name="text"></textarea>
+                  <button class="btn btn-lg btn-primary" id="upload-button" type="submit" >Encrypt image</button>
                 </form>
         
                 <br>
@@ -102,12 +104,11 @@
         </section>
       	
 		 <section style="margin-top:80px;width:50%;float:right;">
-         
+        
          	<div class="form-group">
-              <label for="comment" style="font-weight:bold;">Plaintext:</label>
-              <textarea class="form-control" rows="5" id="text"></textarea>
+              
             </div>
-            
+         
          </section>
     </main>
 

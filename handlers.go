@@ -15,39 +15,50 @@ type Test struct {
 
 // Wrap mux router in a function for testing
 func newRouter() *mux.Router {
-	r := mux.NewRouter()
+	router := mux.NewRouter()
 
 	// Diferent path - method handlers
-	r.HandleFunc("/", rootHandler).Methods("GET")
+	router.HandleFunc("/", rootHandler).Methods("GET")
+	router.HandleFunc("/signup", signupHandler).Methods("GET")
+	router.HandleFunc("/login", loginHandler).Methods("GET")
+	router.HandleFunc("/stegano", steganoHandler).Methods("GET")
 
 	// Static file directory
 	staticFileDirectory := http.Dir("./assets/")
 	staticFileHadler := http.StripPrefix("/assets/", http.FileServer(staticFileDirectory))
-	r.PathPrefix("/assets/").Handler(staticFileHadler).Methods("GET")
+	router.PathPrefix("/assets/").Handler(staticFileHadler).Methods("GET")
 
-	return r
+	return router
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-	t, err := template.ParseFiles("assets/html/index.html")
+	t, err := template.ParseFiles("assets/html/home.html")
 	if err != nil {
 		panic(err)
 	}
+	t.Execute(w, nil /*Test{"Best page title", `assets/images/plain/smaller_image.jpeg`}*/)
+}
 
-	// Connect to mongo before doing anything
-	client, err := mongoConnect()
+func signupHandler(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("assets/html/signup.html")
 	if err != nil {
 		panic(err)
 	}
+	t.Execute(w, nil)
+}
 
-	_, err = getImage(client)
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("assets/html/login.html")
 	if err != nil {
 		panic(err)
 	}
+	t.Execute(w, nil)
+}
 
-	t.Execute(w, Test{"Best page title", `assets/images/plain/smaller_image.jpeg`})
-
-	// fmt.Fprintf(w, "Hello world!")
+func steganoHandler(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("assets/html/stegano.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
 }

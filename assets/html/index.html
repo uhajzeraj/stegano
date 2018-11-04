@@ -1,18 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Opening Page</title>
 
-  <head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="assets/js/main.js"></script>
-    <link rel="stylesheet" href="assets/css/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
-    <title>{{.Title}}</title>
-  </head>
+<link rel="stylesheet" href="style.css">
 
-  <body>
-    <h1 id="h1">Test</h1>
-    <img src="assets/images/plain/rick_morty.jpg"> <br/>
-    <img src="{{.ImgEncode}}" alt="Not displayed">   
-  </body>
+</head>
 
+
+
+<body>
+
+<div class="container">
+
+	<div id="opening">
+    
+        <div id="logo" style="width:40%;margin:auto;margin-top:50px;">
+        
+            <img src="img/Go Cypher (2).png" width="447" height="401" alt=""/>
+        
+        </div>
+          
+        <div style="width:40%;margin:auto;margin-top: 20px">
+          <div style="float:left;margin-left:50px;">
+          <button onclick="location.href='signup.html'" type="button" class="btn btn-default">Sign Up</button>
+          </div>
+          <div style="float:right;margin-right:50px;">
+          <button onclick="location.href='login.html'" type="submit" class="btn btn-default">Login</button>
+          </div>
+        </div>
+        
+        <div id="info" style="width:40%;margin:auto;margin-top:100px;clear:both;align-content:center;">
+            
+            <p>
+            Info about our company services...
+            </p>
+            
+        </div>
+    
+    </div>
+
+</div>
+
+
+</body>
 </html>

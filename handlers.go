@@ -16,6 +16,8 @@ type Test struct {
 // Wrap mux router in a function for testing
 func newRouter() *mux.Router {
 	r := mux.NewRouter()
+
+	// Diferent path - method handlers
 	r.HandleFunc("/", rootHandler).Methods("GET")
 
 	// Static file directory

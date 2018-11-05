@@ -6,11 +6,13 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Test struct for testing
@@ -109,45 +111,75 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 
 func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 
-	displayName := r.FormValue("displayName")
-	email := r.FormValue("displayName")
-	pass := r.FormValue("displayName")
-	passConfirm := r.FormValue("displayName")
-
 	var errorSlice []string
 
-	// Check if displayName is empty
-	if len(displayName) == 0 {
-		errorSlice = append(errorSlice, "Empty displayName")
+	user := r.FormValue("displayName")
+	email := r.FormValue("email")
+	pass := r.FormValue("pass")
+	passConfirm := r.FormValue("passConfirm")
+
+	// Check if username is OK
+	match, err := regexp.MatchString(`^[a-zA-Z0-9_-]{6,30}$`, user)
+	returnEmptyError(err)
+	if !match {
+		errorSlice = append(errorSlice, "Username does not meet the requirements")
 	}
-	// Check if email is empty
-	if len(email) == 0 {
-		errorSlice = append(errorSlice, "Empty email")
+
+	// Check if email is OK
+	match, err = regexp.MatchString("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", email)
+	returnEmptyError(err)
+	if !match {
+		errorSlice = append(errorSlice, "Email does not meet the requirements")
 	}
-	// Check if pass is empty
-	if len(pass) == 0 {
-		errorSlice = append(errorSlice, "Empty password")
+
+	// Check if password is OK
+	match, err = regexp.MatchString(`^.{6,40}$`, pass)
+	returnEmptyError(err)
+	if !match {
+		errorSlice = append(errorSlice, "Password does not meet the requirements")
 	}
-	// Check if passConfirm is empty
-	if len(passConfirm) == 0 {
-		errorSlice = append(errorSlice, "Empty password confirm")
+
+	// Check if confrimPassword is OK
+	match, err = regexp.MatchString(`^.{6,40}$`, passConfirm)
+	returnEmptyError(err)
+	if !match {
+		errorSlice = append(errorSlice, "Confirmation password does not meet the requirements")
 	}
+
+	// Check if email exists
+	exists, err := entryExists("email", email, "users")
+	returnEmptyError(err)
+	if exists {
+		errorSlice = append(errorSlice, "Email already exists")
+	}
+
+	// Check if username exists
+	exists, err = entryExists("user", user, "users")
+	returnEmptyError(err)
+	if exists {
+		errorSlice = append(errorSlice, "Username already exists")
+	}
+
 	// Check if passwords are the same
 	if pass != passConfirm {
 		errorSlice = append(errorSlice, "Passwords do not match")
 	}
 
+	// Check if there are any errors
 	if len(errorSlice) > 0 {
+		for _, val := range errorSlice {
+			fmt.Println(val)
+		}
 		return
 	}
 
-	exist, err := entryExists("email", r.FormValue("email"), "users")
-	if err != nil {
-		return
-	}
-	if exist {
+	// Hash the password
+	hashPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	returnEmptyError(err)
 
-	}
+	// Add the user in the database
+	err = addUser(user, email, string(hashPass))
+	returnEmptyError(err)
 
 }
 

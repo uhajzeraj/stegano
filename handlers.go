@@ -25,10 +25,11 @@ func newRouter() *mux.Router {
 
 	// Diferent path - method handlers
 	router.HandleFunc("/", rootHandler).Methods("GET")
-	router.HandleFunc("/signup", signupHandler).Methods("GET")
+	router.HandleFunc("/signup", signupGetHandler).Methods("GET")
+	router.HandleFunc("/signup", signupPostHandler).Methods("POST")
 	router.HandleFunc("/login", loginHandler).Methods("GET")
-	router.HandleFunc("/stegano", steganoGetHandler).Methods("GET")
 	router.HandleFunc("/test", testHandler).Methods("GET")
+	router.HandleFunc("/stegano", steganoGetHandler).Methods("GET")
 	router.HandleFunc("/stegano", steganoPostHandler).Methods("POST")
 
 	// Static file directory
@@ -47,7 +48,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, nil /*Test{"Best page title", `assets/images/plain/smaller_image.jpeg`}*/)
 }
 
-func signupHandler(w http.ResponseWriter, r *http.Request) {
+func signupGetHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("assets/html/signup.html")
 	if err != nil {
 		panic(err)
@@ -93,24 +94,60 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// textBytes := []byte(text)
-
 	imgBin, err := encode(file, text)
 	if err != nil {
 		return
 	}
 
-	// Create connection to mongoDB
-	conn, err := mongoConnect()
-	errorPanic(err)
-	coll := conn.Database("stegano").Collection("images")
+	// Store the image into DB
+	err = storeImage(imgBin)
+	if err != nil {
+		return
+	}
 
-	// Insert image into mongoDB
-	coll.InsertOne(context.Background(),
-		bson.NewDocument(
-			bson.EC.Binary("imgBin", imgBin),
-		),
-	)
+}
+
+func signupPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	displayName := r.FormValue("displayName")
+	email := r.FormValue("displayName")
+	pass := r.FormValue("displayName")
+	passConfirm := r.FormValue("displayName")
+
+	var errorSlice []string
+
+	// Check if displayName is empty
+	if len(displayName) == 0 {
+		errorSlice = append(errorSlice, "Empty displayName")
+	}
+	// Check if email is empty
+	if len(email) == 0 {
+		errorSlice = append(errorSlice, "Empty email")
+	}
+	// Check if pass is empty
+	if len(pass) == 0 {
+		errorSlice = append(errorSlice, "Empty password")
+	}
+	// Check if passConfirm is empty
+	if len(passConfirm) == 0 {
+		errorSlice = append(errorSlice, "Empty password confirm")
+	}
+	// Check if passwords are the same
+	if pass != passConfirm {
+		errorSlice = append(errorSlice, "Passwords do not match")
+	}
+
+	if len(errorSlice) > 0 {
+		return
+	}
+
+	exist, err := entryExists("email", r.FormValue("email"), "users")
+	if err != nil {
+		return
+	}
+	if exist {
+
+	}
 
 
 }

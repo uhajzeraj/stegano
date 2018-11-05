@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
@@ -37,8 +36,25 @@ func storeImage(encodedImg []byte) error {
 	return nil
 }
 
-func addUser() error {
-	return errors.New("Error")
+func addUser(user, email, passHash string) error {
+	conn, err := mongoConnect()
+	if err != nil {
+		return err
+	}
+
+	coll := conn.Database("stegano").Collection("users")
+	_, err = coll.InsertOne(context.Background(),
+		bson.NewDocument(
+			bson.EC.String("user", user),
+			bson.EC.String("email", email),
+			bson.EC.String("passHash", passHash),
+		),
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func entryExists(entry string, value string, collection string) (bool, error) {
@@ -54,7 +70,6 @@ func entryExists(entry string, value string, collection string) (bool, error) {
 	}
 
 	var holder map[string]interface{}
-
 	for cur.Next(context.Background()) {
 		err := cur.Decode(&holder)
 		if err != nil {
@@ -65,7 +80,6 @@ func entryExists(entry string, value string, collection string) (bool, error) {
 	if _, ok := holder[entry]; ok {
 		return true, nil
 	}
-
 	return false, nil
 }
 

@@ -35,6 +35,8 @@ func Test_rootHandler(t *testing.T){
 	}
 	func Test_steganoPostHandler(t *testing.T) {
 
+		ts := httptest.NewServer(http.HandlerFunc(steganoPostHandler))
+		defer ts.Close()
 		cl, err := mongoConnect()
 		if cl == nil  {
 			t.Error("No connection")
@@ -50,5 +52,51 @@ func Test_rootHandler(t *testing.T){
 		if err!=nil{
 			t.Errorf("Error, %s",err)
 		}
+		client := &http.Client{}
+
+
+
+		req, err := http.NewRequest(http.MethodPost, ts.URL, nil)
+		if err != nil {
+			t.Errorf("Error constructing the POST request, %s", err)
+		}
+
+		resp, err := client.Do(req)
+		if err != nil {
+			t.Errorf("Error executing the POST request, %s", err)
+		}
+
+		//check if the response from the handler is what we except
+		if resp.StatusCode != http.StatusOK {
+			t.Errorf("Expected StatusNotImplemented %d, received %d. ", http.StatusOK, resp.StatusCode)
+			return
+		}
 
 }
+func Test_steganoGetHandler(t *testing.T) {
+
+	ts := httptest.NewServer(http.HandlerFunc(steganoGetHandler))
+	defer ts.Close()
+
+	client := &http.Client{}
+
+	req, err := http.NewRequest(http.MethodGet, ts.URL, nil)
+	if err != nil {
+		t.Errorf("Error constructing the Get request, %s", err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Errorf("Error executing the Get request, %s", err)
+	}
+
+	//check if the response from the handler is what we except
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Expected StatusNotImplemented %d, received %d. ", http.StatusOK, resp.StatusCode)
+		return
+	}
+
+
+
+}
+

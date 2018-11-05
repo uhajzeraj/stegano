@@ -1,22 +1,17 @@
 package main
 
 import (
-	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"time"
 )
 
-// example encode usage: go run png-lsb-steg.go -operation encode -image-input-file test.png -image-output-file steg.png -message-input-file hide.txt
-// example decode usage: go run main.go -operation decode -image-input-file steg.png
-
-// command line options
-var inputFilename = flag.String("in", "", "input image file")
-var messageFilename = flag.String("msg", "", "message input file")
-var operation = flag.String("op", "encode", "encode or decode")
-
 func main() {
+
+	key, _ := getImages("username")
+	fmt.Println(key)
 
 	// Create a router
 	r := newRouter()

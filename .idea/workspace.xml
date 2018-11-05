@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="ec33baed-b4c8-4b4c-a00a-4274c357f546" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/externalurl.go" beforeDir="false" afterPath="$PROJECT_DIR$/externalurl.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/handlers_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/handlers_test.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,29 +17,29 @@
       <usages-collector id="statistics.lifecycle.project">
         <counts>
           <entry key="project.closed" value="1" />
-          <entry key="project.open.time.18" value="1" />
+          <entry key="project.open.time.18" value="2" />
           <entry key="project.open.time.3" value="1" />
-          <entry key="project.opened" value="2" />
+          <entry key="project.opened" value="3" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="go" value="4" />
+          <entry key="go" value="6" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Go" value="4" />
+          <entry key="Go" value="6" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="go" value="502" />
+          <entry key="go" value="580" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Go" value="502" />
+          <entry key="Go" value="580" />
         </counts>
       </usages-collector>
     </session>
@@ -60,8 +61,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/encode.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="266">
-              <caret line="29" column="48" selection-start-line="29" selection-start-column="48" selection-end-line="29" selection-end-column="48" />
+            <state relative-caret-position="247">
+              <caret line="27" column="19" selection-start-line="27" selection-start-column="19" selection-end-line="27" selection-end-column="19" />
               <folding>
                 <element signature="e#14#183#0" expanded="true" />
               </folding>
@@ -72,11 +73,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/handlers_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="329">
-              <caret line="98" selection-start-line="98" selection-end-line="98" />
-              <folding>
-                <element signature="e#14#57#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="1452">
+              <caret line="129" selection-start-line="129" selection-end-line="129" />
             </state>
           </provider>
         </entry>
@@ -84,8 +82,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/handlers.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="62" column="21" lean-forward="true" selection-start-line="62" selection-start-column="21" selection-end-line="62" selection-end-column="21" />
+            <state relative-caret-position="399">
+              <caret line="50" column="60" lean-forward="true" selection-end-line="163" />
             </state>
           </provider>
         </entry>
@@ -93,8 +91,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/externalurl.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="76">
-              <caret line="13" selection-start-line="13" selection-end-line="13" />
+            <state relative-caret-position="209">
+              <caret line="11" selection-start-line="11" selection-end-line="11" />
             </state>
           </provider>
         </entry>
@@ -115,6 +113,8 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
+        <option value="$PROJECT_DIR$/externalurl.go" />
+        <option value="$PROJECT_DIR$/handlers.go" />
         <option value="$PROJECT_DIR$/handlers_test.go" />
       </list>
     </option>
@@ -136,6 +136,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -147,7 +148,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -169,10 +169,10 @@
     </option>
   </component>
   <component name="ToolWindowManager">
-    <frame x="67" y="25" width="1853" height="925" extended-state="7" />
+    <frame x="67" y="25" width="1853" height="925" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25235197" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.255119" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -210,6 +210,20 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file:///snap/go/3039/src/runtime/panic.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="512" selection-start-line="512" selection-end-line="512" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///snap/go/3039/src/testing/testing.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="791" selection-start-line="791" selection-end-line="791" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="266">
@@ -220,37 +234,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/externalurl.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="76">
-          <caret line="13" selection-start-line="13" selection-end-line="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/encode.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
-          <caret line="29" column="48" selection-start-line="29" selection-start-column="48" selection-end-line="29" selection-end-column="48" />
+        <state relative-caret-position="247">
+          <caret line="27" column="19" selection-start-line="27" selection-start-column="19" selection-end-line="27" selection-end-column="19" />
           <folding>
             <element signature="e#14#183#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/externalurl.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="11" selection-start-line="11" selection-end-line="11" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/handlers_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="329">
-          <caret line="98" selection-start-line="98" selection-end-line="98" />
-          <folding>
-            <element signature="e#14#57#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="1452">
+          <caret line="129" selection-start-line="129" selection-end-line="129" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/handlers.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="62" column="21" lean-forward="true" selection-start-line="62" selection-start-column="21" selection-end-line="62" selection-end-column="21" />
+        <state relative-caret-position="399">
+          <caret line="50" column="60" lean-forward="true" selection-end-line="163" />
         </state>
       </provider>
     </entry>

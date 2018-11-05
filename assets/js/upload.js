@@ -16,7 +16,7 @@ function selectImage(e) {
 
 $(document).ready(function (e) {
 
-  var maxsize = 500 * 1024; // 500 KB
+  var maxsize = 5000 * 1024; // 500 KB
 
   $('#max-size').html((maxsize/1024).toFixed(2));
 
@@ -27,6 +27,7 @@ $(document).ready(function (e) {
     $('#message').empty();
     $('#loading').show();
 
+    //TODO: loading
     $.ajax({
       url: "upload-image.php",
       type: "POST",

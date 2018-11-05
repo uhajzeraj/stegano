@@ -64,7 +64,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func steganoGetHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("assets/html/test_stegano.html")
+	t, err := template.ParseFiles("assets/html/stegano.html")
 	if err != nil {
 		panic(err)
 	}
@@ -111,6 +111,7 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 			bson.EC.Binary("imgBin", imgBin),
 		),
 	)
+
 
 }
 

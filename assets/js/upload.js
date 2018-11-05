@@ -20,29 +20,36 @@ $(document).ready(function (e) {
 
   $('#max-size').html((maxsize/1024).toFixed(2));
 
-  $('#upload-image-form').on('submit', function(e) {
 
-    e.preventDefault();
+    $(document).ready(function() {
+        $(`#upload-button`).click(function(e) {
 
-    $('#message').empty();
-    $('#loading').show();
+            e.preventDefault();
 
-    //TODO: loading
-    $.ajax({
-      url: "upload-image.php",
-      type: "POST",
-      data: new FormData(this),
-      contentType: false,
-      cache: false,
-      processData: false,
-      success: function(data)
-      {
-        $('#loading').hide();
-        $('#message').html(data);
-      }
+            var formData = new FormData();
+            var text = $(`textarea#text`).val();
+            formData.append('text', text);
+            var image = $(`#file`)[0].files[0];
+            formData.append('image', image);
+
+            $('#message').empty();
+            $('#loading').show();
+
+
+            $.ajax({
+                url: "stegano",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function() {
+                    $('#loading').hide();
+                    $('#message').html(data);
+                }
+            });
+
+        });
     });
-
-  });
 
   $('#file').change(function() {
 

@@ -33,6 +33,9 @@ func newRouter() *mux.Router {
 	router.HandleFunc("/stegano", steganoGetHandler).Methods("GET")
 	router.HandleFunc("/stegano", steganoPostHandler).Methods("POST")
 
+	router.HandleFunc("/caesar", caesarGetHandler).Methods("GET")
+	router.HandleFunc("/caesar", caesarPostHandler).Methods("POST")
+
 	// Static file directory
 	staticFileDirectory := http.Dir("./assets/")
 	staticFileHadler := http.StripPrefix("/assets/", http.FileServer(staticFileDirectory))
@@ -186,3 +189,31 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, test)
 
 }
+
+
+
+/* CAESAR's CIPHER */
+func caesarGetHandler(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("assets/html/caesar.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if textfield is empty
+	if len(r.FormValue("plaintext")) == 0 {
+		fmt.Println("Empty text field")
+		return
+	}
+
+	plaintext := r.FormValue("plaintext") // Get the text received
+
+	ciphertext := encodeCaesar(plaintext)
+
+	fmt.Fprint(w, ciphertext)
+
+}
+

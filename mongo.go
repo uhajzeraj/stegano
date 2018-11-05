@@ -12,7 +12,7 @@ import (
 // Returns a mongo client to use for interactions with the database
 func mongoConnect() (*mongo.Client, error) {
 	// Connect to OpenStack remote MongoDB
-	conn, err := mongo.Connect(context.Background(), "mongodb://admin:adminPass321@10.212.138.222/stegano", nil)
+	conn, err := mongo.Connect(context.Background(), "mongodb://admin:connecttome123@ds151533.mlab.com:51533/stegano", nil)
 	if err != nil {
 		return nil, err
 	}

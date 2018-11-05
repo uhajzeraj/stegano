@@ -71,28 +71,27 @@
         <p>Our company is offering a service where you upload an image and write some text you want to hide into that photo!</p>
         
         <section style="margin-top:80px;">
-       		
-            
-              <div style="margin: auto;">
-              
+
+
+            <div style="margin: auto;">
+
                 <form id="upload-image-form" action="/submit" method="post" enctype="multipart/form-data" name="enc">
-                  <div style="width: 50%;float: left;">
+                    <div style="width: 50%;float: left;">
                         <div id="image-preview-div" style="display: none;width: 50%;float: left;">
-                        <label for="exampleInputFile" style="font-weight: bold;">Selected image:</label>
-                        <br>
-                          <img id="preview-img" src="noimage">
-                      </div>
-                      <div class="form-group">
-                        <input type="file" name="file" id="file" required>
-                      </div>
-                  </div>
+                            <label for="exampleInputFile" style="font-weight: bold;">Selected image:</label>
+                            <br>
+                            <img id="preview-img" src="noimage">
+                        </div>
+                        <div class="form-group">
+                            <input type="file" name="file" id="file" required>
+                        </div>
+                    </div>
                     <div style="width: 50%;float: right;">
                         <label for="comment" style="font-weight:bold;">Plaintext:</label>
                         <textarea class="form-control" rows="5" id="text" name="text"></textarea>
                         <br>
                         <button class="btn btn-lg btn-primary" id="upload-button" type="submit" >Encrypt image</button>
-                    </div>
-                    <div style="clear: both;">
+
                         <br><br>
                         <div class="alert alert-info" id="loading" style="display: none;" role="alert">
                             Encoding image...
@@ -104,9 +103,9 @@
                         <div id="message"></div>
                     </div>
                 </form>
-        
 
-              </div>
+
+            </div>
         
         
         </section>

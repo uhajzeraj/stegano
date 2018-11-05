@@ -67,7 +67,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func steganoGetHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("assets/html/test_stegano.html")
+	t, err := template.ParseFiles("assets/html/stegano.html")
 	if err != nil {
 		panic(err)
 	}
@@ -180,6 +180,7 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Add the user in the database
 	err = addUser(user, email, string(hashPass))
 	returnEmptyError(err)
+
 
 }
 

@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-
-	_ "crypto/sha256"
+	"errors"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
-// Returns a mongo client to use for interactions with the database
+// Returns a mongo client to interact with the database
 func mongoConnect() (*mongo.Client, error) {
 	// Connect to OpenStack remote MongoDB
 	conn, err := mongo.Connect(context.Background(), "mongodb://admin:connecttome123@ds151533.mlab.com:51533/stegano", nil)
@@ -19,20 +18,55 @@ func mongoConnect() (*mongo.Client, error) {
 	return conn, nil
 }
 
-func storeImage(client *mongo.Client, encodedImg string) error {
+func storeImage(encodedImg []byte) error {
+	con, err := mongoConnect()
+	if err != nil {
+		return err
+	}
 
-	coll := client.Database("stegano").Collection("images") // `images` collection, `stegano` database
+	coll := con.Database("stegano").Collection("images") // `images` collection, `stegano` database
 
-	_, err := coll.InsertOne(context.Background(), // Insert base64 encoding of image in the database
-		bson.NewDocument(
-			bson.EC.String("imgEncoding", encodedImg),
-		))
-
+	// Insert image into collection
+	_, err = coll.InsertOne(context.Background(),
+		bson.NewDocument(bson.EC.Binary("imgEncoding", encodedImg)),
+	)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func addUser() error {
+	return errors.New("Error")
+}
+
+func entryExists(entry string, value string, collection string) (bool, error) {
+	conn, err := mongoConnect()
+	if err != nil {
+		return false, err
+	}
+
+	coll := conn.Database("stegano").Collection(collection)
+	cur, err := coll.Find(context.Background(), bson.NewDocument(bson.EC.String(entry, value)))
+	if err != nil {
+		return false, err
+	}
+
+	var holder map[string]interface{}
+
+	for cur.Next(context.Background()) {
+		err := cur.Decode(&holder)
+		if err != nil {
+			return false, err
+		}
+	}
+
+	if _, ok := holder[entry]; ok {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func getImage(client *mongo.Client) (map[string]interface{}, error) {

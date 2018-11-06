@@ -2,10 +2,10 @@ package main
 
 // cipher takes in the text to be ciphered along with the direction that
 // is being taken; -1 means encoding, +1 means decoding.
-func cipher(text string, direction int) string {
+func cipher(text string, direction int, shiftSize int) string {
 	// shift -> number of letters to move to right or left
 	// offset -> size of the alphabet, in this case the plain ASCII
-	shift, offset := rune(3), rune(26)
+	shift, offset := rune(shiftSize), rune(26)
 
 	// string->rune conversion
 	runes := []rune(text)
@@ -45,6 +45,6 @@ func cipher(text string, direction int) string {
 
 // encode and decode provide the API for encoding and decoding text using
 // the Caesar Cipher algorithm.
-func encodeCaesar(text string) string { return cipher(text, -1) }
-func decodeCaesar(text string) string { return cipher(text, +1) }
+func encodeCaesar(text string, shiftSize int) string { return cipher(text, -1, shiftSize) }
+func decodeCaesar(text string, shiftSize int) string { return cipher(text, +1, shiftSize) }
 

@@ -1,8 +1,11 @@
 package main
 
 import (
+<<<<<<< HEAD
 	//"github.com/mongodb/mongo-go-driver/core/result"
 	"context"
+=======
+>>>>>>> edc8da746afe5698fdbcaceabe3a4b6247358d06
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -12,9 +15,12 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/mux"
+<<<<<<< HEAD
 	"github.com/mongodb/mongo-go-driver/mongo"
 	//"github.com/mongodb/mongo-go-driver/bson"
 	//"github.com/mongodb/mongo-go-driver/mongo"
+=======
+>>>>>>> edc8da746afe5698fdbcaceabe3a4b6247358d06
 	"golang.org/x/crypto/bcrypt"
 	"log"
 )
@@ -118,7 +124,7 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Store the image into DB
-	err = storeImage(imgBin)
+	err = storeImage("uranii", imgBin)
 	if err != nil {
 		return
 	}
@@ -151,6 +157,7 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Add the user in the database
 	err = addUser(user, email, string(hashPass))
 	returnEmptyError(err)
+<<<<<<< HEAD
 
 	session, err := store.Get(r, "user-login")
 	if err != nil {
@@ -168,54 +175,52 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// w.Write([]byte("This seems to work"))
 	fmt.Fprintf(w, "This seems to work")
+=======
+>>>>>>> edc8da746afe5698fdbcaceabe3a4b6247358d06
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
 
 	counter := 1
 
-	// Create connection to mongo
-	conn, err := mongo.Connect(context.Background(), "mongodb://admin:connecttome123@ds151533.mlab.com:51533/stegano", nil)
-	if err != nil {
-		panic(err)
-	}
-	coll := conn.Database("stegano").Collection("images")
+	// Get the user based on the session info
+	sessionUser := "uranii" // This needs to be changed
 
-	// Fetch image from mongo
-	cur, err := coll.Find(context.Background(), nil)
+	err := decode(sessionUser)
 	if err != nil {
 		panic(err)
 	}
-	var img map[string]interface{}       // Here we'll store fetched images
-	for cur.Next(context.Background()) { // Iterate the cursor
-		err := cur.Decode(&img) // Store fetched images
-		if err != nil {
-			panic(err)
-		}
+
+	// Fetch images from Mongo
+	images, err := getImages(sessionUser)
+	returnEmptyError(err)
+
+	for _, val := range images {
 
 		// Save new image here
-		err = ioutil.WriteFile("assets/images/plain/image"+strconv.Itoa(counter)+".png", bson.Binary(img["imgBin"].(bson.Binary)).Data, 0644)
+		err = ioutil.WriteFile("assets/images/"+sessionUser+"img"+strconv.Itoa(counter)+".png", val, 0644)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
+
 		counter++
 
 	}
 
 	// HTML Templating
 	t, err := template.ParseFiles("assets/html/test.html")
-	if err != nil {
-		panic(err)
-	}
+	returnEmptyError(err)
 
 	test := Test{Title: "Best page title"}
 
 	for i := 1; i < counter; i++ {
-		test.ImgEncode = append(test.ImgEncode, "assets/images/plain/image"+strconv.Itoa(i)+".png")
+		test.ImgEncode = append(test.ImgEncode, "assets/images/"+sessionUser+"img"+strconv.Itoa(i)+".png")
 	}
 
-	t.Execute(w, test)
-
+	err = t.Execute(w, test)
+	// if err == nil {
+	// 	// os.RemoveAll("assets/images/uranii")
+	// }
 }
 
 /* CAESAR's CIPHER */
@@ -236,12 +241,17 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	plaintext := r.FormValue("plaintext") // Get the text received
+	shiftSize, err := strconv.Atoi(r.FormValue("shiftSize"))
+	if err != nil {
+		return
+	}
 
-	ciphertext := encodeCaesar(plaintext)
+	ciphertext := encodeCaesar(plaintext, shiftSize)
 
 	fmt.Fprint(w, ciphertext)
 
 }
+<<<<<<< HEAD
 
 func postLoginHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -316,3 +326,5 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	t.Execute(w, nil)
 }
+=======
+>>>>>>> edc8da746afe5698fdbcaceabe3a4b6247358d06

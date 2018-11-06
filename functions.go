@@ -1,6 +1,9 @@
 package main
 
-import "regexp"
+import (
+	"os"
+	"regexp"
+)
 
 // Damn you gometalinter and your cyclomatic complexity
 func errorPanic(err error) {
@@ -14,6 +17,17 @@ func returnEmptyError(err error) {
 	if err != nil {
 		return
 	}
+}
+
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
 }
 
 // Validate fields

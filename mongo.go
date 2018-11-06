@@ -15,13 +15,13 @@ type Images struct {
 }
 
 // User struct fuck you
-type User struct {
-	ID       bson.ObjectId `bson:"_id"`
-	User     string        `bson:"user"`
-	Email    string        `bson:"email"`
-	PassHash string        `bson:"passHash"`
-	Images   [][]byte      `bson:"images"`
-}
+// type User struct {
+// 	ID       bson.ObjectId `bson:"_id"`
+// 	User     string        `bson:"user"`
+// 	Email    string        `bson:"email"`
+// 	PassHash string        `bson:"passHash"`
+// 	Images   [][]byte      `bson:"images"`
+// }
 
 func storeImage(user string, encodedImg []byte) error {
 

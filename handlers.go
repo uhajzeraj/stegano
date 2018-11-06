@@ -28,7 +28,7 @@ type Test struct {
 }
 
 type PassHASH struct {
-	PassHash string `bson:"passHash"`
+	User string `bson:"user"`
 }
 
 //Session var
@@ -161,7 +161,7 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set some session values.
-	session.Values["hash"] = string(hashPass)
+	session.Values["user"] = user
 	//session.Values[] = 43
 	// Save it before we write to the response/return from the handler.
 	session.Save(r, w)
@@ -261,24 +261,18 @@ func postLoginHandler(w http.ResponseWriter, r *http.Request) {
 		errorSlice = append(errorSlice, "Email does not meet the requirements")
 	}
 
-	// exists, err := entryExists("email", email, "users")
-	// returnEmptyError(err)
-	// if !exists {
-	// 	errorSlice = append(errorSlice, "Email already exists")
-	// }
-
 	hashPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 	returnEmptyError(err)
 
 	coll := conn.DB("stegano").C("users")
 	result := PassHASH{}
-	err = coll.Find(bson.M{"email": email}).Select(bson.M{"hashPass": 1}).One(&result)
+	err = coll.Find(bson.M{"email": email}).Select(bson.M{"user": 1}).One(&result)
 	fmt.Println(result)
 	if err != nil {
 		panic(err)
 	}
 
-	if result.PassHash == "" {
+	if result.User == "" {
 		//TODO handle username or password incorrect
 		http.Error(w, "404",404)
 		return

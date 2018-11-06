@@ -1,60 +1,65 @@
 package main
 
-// func decode(inputFile *string) error {
-// 	inputReader, err := os.Open(*inputFile) // read the input file
-// 	if err != nil {
-// 		panic(err)
-// 	}
+import (
+	"bytes"
+	"fmt"
+	"image"
+	"image/color"
+)
 
-// 	img, _, err := image.Decode(inputReader) // decode the image
-// 	if err != nil {
-// 		panic(err)
-// 	}
+func decode(sessionUser string) error {
 
-// 	bounds := img.Bounds() // get the bounds of the image
+	imgs, err := getImages(sessionUser)
+	if err != nil {
+		panic(err)
+	}
 
-// 	// get the rows and columns of the image
-// 	// loop over rows we will break here if done reading message
-// 	stringOutput := ""
+	for _, val := range imgs {
 
-// LoopBreak:
+		img, _, err := image.Decode(bytes.NewReader(val)) // decode the image
+		if err != nil {
+			panic(err)
+		}
 
-// 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-// 		// loop over columns
-// 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+		bounds := img.Bounds() // get the bounds of the image
 
-// 			// get the rgba values from the input image
-// 			c := img.At(x, y).(color.NRGBA64)
-// 			r := uint32(c.R)
-// 			g := uint32(c.G)
-// 			b := uint32(c.B)
-// 			a := uint32(c.A)
+		// get the rows and columns of the image
+		// loop over rows we will break here if done reading message
+		stringOutput := ""
 
-// 			// build the byte from the color lsbs
-// 			ch := (r & ^lsbMask) << 6
-// 			ch += (g & ^lsbMask) << 4
-// 			ch += (b & ^lsbMask) << 2
-// 			ch += (a & ^lsbMask)
+	LoopBreak:
 
-// 			// if we come across a zero byte
-// 			if ch == 0 {
-// 				break LoopBreak
-// 			}
+		for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+			// loop over columns
+			for x := bounds.Min.X; x < bounds.Max.X; x++ {
 
-// 			// If the char is valid ascii print it out
-// 			if (ch >= 32 && ch <= 126) || ch == '\n' {
-// 				fmt.Printf("%c", ch)
-// 				stringOutput += string(ch)
-// 			}
-// 		}
-// 	}
-// 	// newline
-// 	fmt.Printf("\n")
-// 	err = inputReader.Close() // close the reader
-// 	if err != nil {
-// 		panic(err)
-// 	}
+				// get the rgba values from the input image
+				c := img.At(x, y).(color.NRGBA64)
+				r := uint32(c.R)
+				g := uint32(c.G)
+				b := uint32(c.B)
+				a := uint32(c.A)
 
-// 	saveFile(outputName(*inputFile), stringOutput)
-// 	return nil
-// }
+				// build the byte from the color lsbs
+				ch := (r & ^lsbMask) << 6
+				ch += (g & ^lsbMask) << 4
+				ch += (b & ^lsbMask) << 2
+				ch += (a & ^lsbMask)
+
+				// if we come across a zero byte
+				if ch == 0 {
+					break LoopBreak
+				}
+
+				// If the char is valid ascii print it out
+				if (ch >= 32 && ch <= 126) || ch == '\n' {
+					stringOutput += string(ch)
+				}
+			}
+		}
+		// newline
+		// fmt.Printf("\n")
+		fmt.Println(stringOutput)
+	}
+	return nil
+}

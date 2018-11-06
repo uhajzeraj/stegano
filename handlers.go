@@ -100,8 +100,6 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(string(imgBin))
-
 	// Store the image into DB
 	err = storeImage("uranii", imgBin)
 	if err != nil {
@@ -145,8 +143,10 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the user based on the session info
 	sessionUser := "uranii" // This needs to be changed
 
-	// The path where the images are stored
-	imgPath := "assets/images/" + sessionUser + "img" + strconv.Itoa(counter) + ".png"
+	err := decode(sessionUser)
+	if err != nil {
+		panic(err)
+	}
 
 	// Fetch images from Mongo
 	images, err := getImages(sessionUser)
@@ -155,7 +155,7 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	for _, val := range images {
 
 		// Save new image here
-		err = ioutil.WriteFile(imgPath, val, 0644)
+		err = ioutil.WriteFile("assets/images/"+sessionUser+"img"+strconv.Itoa(counter)+".png", val, 0644)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -171,7 +171,7 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	test := Test{Title: "Best page title"}
 
 	for i := 1; i < counter; i++ {
-		test.ImgEncode = append(test.ImgEncode, imgPath)
+		test.ImgEncode = append(test.ImgEncode, "assets/images/"+sessionUser+"img"+strconv.Itoa(i)+".png")
 	}
 
 	err = t.Execute(w, test)
@@ -198,7 +198,10 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	plaintext := r.FormValue("plaintext") // Get the text received
-	shiftSize := r.FormValue("shiftSize")
+	shiftSize, err := strconv.Atoi(r.FormValue("shiftSize"))
+	if err != nil {
+		return
+	}
 
 	ciphertext := encodeCaesar(plaintext, shiftSize)
 

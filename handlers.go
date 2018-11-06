@@ -1,28 +1,20 @@
 package main
 
 import (
-<<<<<<< HEAD
 	//"github.com/mongodb/mongo-go-driver/core/result"
-	"context"
-=======
->>>>>>> edc8da746afe5698fdbcaceabe3a4b6247358d06
+
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"regexp"
 	"strconv"
-	"github.com/gorilla/sessions"
+
 	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/mux"
-<<<<<<< HEAD
-	"github.com/mongodb/mongo-go-driver/mongo"
-	//"github.com/mongodb/mongo-go-driver/bson"
-	//"github.com/mongodb/mongo-go-driver/mongo"
-=======
->>>>>>> edc8da746afe5698fdbcaceabe3a4b6247358d06
+	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 )
 
 // Test struct for testing
@@ -31,6 +23,7 @@ type Test struct {
 	ImgEncode []string
 }
 
+// User struct
 type User struct {
 	PassHash string
 }
@@ -157,7 +150,6 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Add the user in the database
 	err = addUser(user, email, string(hashPass))
 	returnEmptyError(err)
-<<<<<<< HEAD
 
 	session, err := store.Get(r, "user-login")
 	if err != nil {
@@ -175,8 +167,6 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// w.Write([]byte("This seems to work"))
 	fmt.Fprintf(w, "This seems to work")
-=======
->>>>>>> edc8da746afe5698fdbcaceabe3a4b6247358d06
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
@@ -198,7 +188,7 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	for _, val := range images {
 
 		// Save new image here
-		err = ioutil.WriteFile("assets/images/"+sessionUser+"img"+strconv.Itoa(counter)+".png", val, 0644)
+		err = ioutil.WriteFile("assets/images/"+sessionUser+strconv.Itoa(counter)+".png", val, 0644)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -214,7 +204,7 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	test := Test{Title: "Best page title"}
 
 	for i := 1; i < counter; i++ {
-		test.ImgEncode = append(test.ImgEncode, "assets/images/"+sessionUser+"img"+strconv.Itoa(i)+".png")
+		test.ImgEncode = append(test.ImgEncode, "assets/images/"+sessionUser+strconv.Itoa(i)+".png")
 	}
 
 	err = t.Execute(w, test)
@@ -251,7 +241,6 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, ciphertext)
 
 }
-<<<<<<< HEAD
 
 func postLoginHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -288,7 +277,7 @@ func postLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if result.PassHash == "" {
 		//TODO handle username or password incorrect
-		http.Error(w, "404",404)
+		http.Error(w, "404", 404)
 		return
 	}
 
@@ -326,5 +315,3 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	t.Execute(w, nil)
 }
-=======
->>>>>>> edc8da746afe5698fdbcaceabe3a4b6247358d06

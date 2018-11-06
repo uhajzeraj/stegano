@@ -1,17 +1,35 @@
 package main
 
 import (
-	"context"
+<<<<<<< HEAD
+	//"github.com/mongodb/mongo-go-driver/core/result"
+
+=======
+
+	//"github.com/mongodb/mongo-go-driver/core/result"
+	//"context"
+>>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 
+	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/mux"
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo"
+<<<<<<< HEAD
+	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
+=======
+
+	//"github.com/mongodb/mongo-go-driver/mongo"
+	//"github.com/mongodb/mongo-go-driver/bson"
+	//"github.com/mongodb/mongo-go-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
+	//"log"
+>>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22
 )
 
 // Test struct for testing
@@ -19,6 +37,19 @@ type Test struct {
 	Title     string
 	ImgEncode []string
 }
+
+<<<<<<< HEAD
+// User struct
+type User struct {
+	PassHash string
+=======
+type PassHASH struct {
+	PassHash string `bson:"passHash"`
+>>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22
+}
+
+//Session var
+var store = sessions.NewCookieStore([]byte("asdaskdhasdhgsajdgasdsadksakdhasidoajsdousahdopj"))
 
 // Wrap mux router in a function for testing
 func newRouter() *mux.Router {
@@ -35,6 +66,8 @@ func newRouter() *mux.Router {
 
 	router.HandleFunc("/caesar", caesarGetHandler).Methods("GET")
 	router.HandleFunc("/caesar", caesarPostHandler).Methods("POST")
+	router.HandleFunc("/login", postLoginHandler).Methods("POST")
+	router.HandleFunc("/home", homeHandler)
 
 	// Static file directory
 	staticFileDirectory := http.Dir("./assets/")
@@ -104,7 +137,7 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Store the image into DB
-	err = storeImage(imgBin)
+	err = storeImage("uranii", imgBin)
 	if err != nil {
 		return
 	}
@@ -138,59 +171,71 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 	err = addUser(user, email, string(hashPass))
 	returnEmptyError(err)
 
+	session, err := store.Get(r, "user-login")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Set some session values.
+	session.Values["hash"] = string(hashPass)
+	//session.Values[] = 43
+	// Save it before we write to the response/return from the handler.
+	session.Save(r, w)
+
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
+
 	// w.Write([]byte("This seems to work"))
 	fmt.Fprintf(w, "This seems to work")
+<<<<<<< HEAD
+=======
+
+>>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
 
 	counter := 1
 
-	// Create connection to mongo
-	conn, err := mongo.Connect(context.Background(), "mongodb://admin:connecttome123@ds151533.mlab.com:51533/stegano", nil)
-	if err != nil {
-		panic(err)
-	}
-	coll := conn.Database("stegano").Collection("images")
+	// Get the user based on the session info
+	sessionUser := "uranii" // This needs to be changed
 
-	// Fetch image from mongo
-	cur, err := coll.Find(context.Background(), nil)
+	err := decode(sessionUser)
 	if err != nil {
 		panic(err)
 	}
-	var img map[string]interface{}       // Here we'll store fetched images
-	for cur.Next(context.Background()) { // Iterate the cursor
-		err := cur.Decode(&img) // Store fetched images
-		if err != nil {
-			panic(err)
-		}
+
+	// Fetch images from Mongo
+	images, err := getImages(sessionUser)
+	returnEmptyError(err)
+
+	for _, val := range images {
 
 		// Save new image here
-		err = ioutil.WriteFile("assets/images/plain/image"+strconv.Itoa(counter)+".png", bson.Binary(img["imgBin"].(bson.Binary)).Data, 0644)
+		err = ioutil.WriteFile("assets/images/"+sessionUser+strconv.Itoa(counter)+".png", val, 0644)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
+
 		counter++
 
 	}
 
 	// HTML Templating
 	t, err := template.ParseFiles("assets/html/test.html")
-	if err != nil {
-		panic(err)
-	}
+	returnEmptyError(err)
 
 	test := Test{Title: "Best page title"}
 
 	for i := 1; i < counter; i++ {
-		test.ImgEncode = append(test.ImgEncode, "assets/images/plain/image"+strconv.Itoa(i)+".png")
+		test.ImgEncode = append(test.ImgEncode, "assets/images/"+sessionUser+strconv.Itoa(i)+".png")
 	}
 
-	t.Execute(w, test)
-
+	err = t.Execute(w, test)
+	// if err == nil {
+	// 	// os.RemoveAll("assets/images/uranii")
+	// }
 }
-
-
 
 /* CAESAR's CIPHER */
 func caesarGetHandler(w http.ResponseWriter, r *http.Request) {
@@ -210,7 +255,10 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	plaintext := r.FormValue("plaintext") // Get the text received
-	shiftSize := r.FormValue("shiftSize")
+	shiftSize, err := strconv.Atoi(r.FormValue("shiftSize"))
+	if err != nil {
+		return
+	}
 
 	ciphertext := encodeCaesar(plaintext, shiftSize)
 
@@ -218,3 +266,79 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func postLoginHandler(w http.ResponseWriter, r *http.Request) {
+
+	var errorSlice []string
+
+	email := r.FormValue("username")
+	pass := r.FormValue("pass")
+
+	fmt.Println(email)
+
+	match, err := regexp.MatchString("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", email)
+	returnEmptyError(err)
+	if !match {
+		errorSlice = append(errorSlice, "Email does not meet the requirements")
+	}
+
+	// exists, err := entryExists("email", email, "users")
+	// returnEmptyError(err)
+	// if !exists {
+	// 	errorSlice = append(errorSlice, "Email already exists")
+	// }
+
+	hashPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	returnEmptyError(err)
+
+	coll := conn.DB("stegano").C("users")
+	result := PassHASH{}
+	err = coll.Find(bson.M{"email": email}).Select(bson.M{"hashPass": 1}).One(&result)
+	fmt.Println(result)
+	if err != nil {
+		panic(err)
+	}
+
+	if result.PassHash == "" {
+		//TODO handle username or password incorrect
+		http.Error(w, "404", 404)
+		return
+	}
+
+	session, err := store.Get(r, "user-login")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Set some session values.
+	session.Values["hash"] = string(hashPass)
+	//session.Values[] = 43
+	// Save it before we write to the response/return from the handler.
+	session.Save(r, w)
+
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
+
+}
+
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, "user-login")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if session.Values["hash"] == "" {
+		//TODO: don't show anything
+		http.Error(w, err.Error(), 404)
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/home.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+<<<<<<< HEAD
+=======
+
+>>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22

@@ -11,26 +11,17 @@ var (
 
 // Images struct for storing fetched images
 type Images struct {
-	Images []int
+	Images [][]byte `bson:"images"`
 }
 
-// Returns a mongo client to interact with the database
-// func mongoConnect() (*mongo.Client, error) {
-// 	// Connect to OpenStack remote MongoDB
-// 	conn, err := mongo.Connect(context.Background(), "mongodb://admin:connecttome123@ds151533.mlab.com:51533/stegano", nil)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return conn, nil
-// }
+func storeImage(user string, encodedImg []byte) error {
 
-func storeImage(encodedImg []byte) error {
-
-	coll := conn.DB("stegano").C("images") // `images` collection, `stegano` database
+	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
 
 	// Insert image into collection
-	err := coll.Insert(
-		bson.M{"imgEncoding": encodedImg},
+	err := coll.Update(
+		bson.M{"user": user},
+		bson.M{"$push": bson.M{"images": encodedImg}},
 	)
 	if err != nil {
 		return err
@@ -40,10 +31,6 @@ func storeImage(encodedImg []byte) error {
 }
 
 func addUser(user, email, passHash string) error {
-	// conn, err := mongoConnect()
-	// if err != nil {
-	// 	return err
-	// }
 
 	coll := conn.DB("stegano").C("users")
 	err := coll.Insert(
@@ -74,7 +61,7 @@ func entryExists(entry string, value string, collection string) (bool, error) {
 	return false, nil
 }
 
-func getImages(user string) ([]int, error) {
+func getImages(user string) ([][]byte, error) {
 
 	coll := conn.DB("stegano").C("users") // `images` collection, `stegano` database
 
@@ -83,8 +70,11 @@ func getImages(user string) ([]int, error) {
 	err := coll.Find(
 		bson.M{"user": user},
 	).Select(
-		bson.M{"images": 1, "_id": 0},
+		bson.M{
+			"images": 1,
+		},
 	).One(&img)
+
 	if err != nil {
 		return nil, err
 	}

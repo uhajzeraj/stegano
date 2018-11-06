@@ -1,8 +1,14 @@
 package main
 
 import (
+<<<<<<< HEAD
 	//"github.com/mongodb/mongo-go-driver/core/result"
 
+=======
+
+	//"github.com/mongodb/mongo-go-driver/core/result"
+	//"context"
+>>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -13,8 +19,17 @@ import (
 
 	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/mux"
+<<<<<<< HEAD
 	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
+=======
+
+	//"github.com/mongodb/mongo-go-driver/mongo"
+	//"github.com/mongodb/mongo-go-driver/bson"
+	//"github.com/mongodb/mongo-go-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
+	//"log"
+>>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22
 )
 
 // Test struct for testing
@@ -23,9 +38,14 @@ type Test struct {
 	ImgEncode []string
 }
 
+<<<<<<< HEAD
 // User struct
 type User struct {
 	PassHash string
+=======
+type PassHASH struct {
+	PassHash string `bson:"passHash"`
+>>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22
 }
 
 //Session var
@@ -167,6 +187,10 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// w.Write([]byte("This seems to work"))
 	fmt.Fprintf(w, "This seems to work")
+<<<<<<< HEAD
+=======
+
+>>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
@@ -249,28 +273,27 @@ func postLoginHandler(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("username")
 	pass := r.FormValue("pass")
 
+	fmt.Println(email)
+
 	match, err := regexp.MatchString("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", email)
 	returnEmptyError(err)
 	if !match {
 		errorSlice = append(errorSlice, "Email does not meet the requirements")
 	}
 
-	exists, err := entryExists("email", email, "users")
-	returnEmptyError(err)
-	if !exists {
-		errorSlice = append(errorSlice, "Email already exists")
-	}
+	// exists, err := entryExists("email", email, "users")
+	// returnEmptyError(err)
+	// if !exists {
+	// 	errorSlice = append(errorSlice, "Email already exists")
+	// }
 
 	hashPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 	returnEmptyError(err)
 
 	coll := conn.DB("stegano").C("users")
-	result := User{}
-	err = coll.Find(bson.M{"email": email}).One(&result)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = coll.Find(bson.M{"email": email}).Select(bson.M{"hashPass": 0}).One(&result)
+	result := PassHASH{}
+	err = coll.Find(bson.M{"email": email}).Select(bson.M{"hashPass": 1}).One(&result)
+	fmt.Println(result)
 	if err != nil {
 		panic(err)
 	}
@@ -315,3 +338,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	t.Execute(w, nil)
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22

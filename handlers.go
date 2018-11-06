@@ -1,20 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io/ioutil"
-	"log"
+	"net/http"
 	"regexp"
 	"strconv"
 
 	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/mux"
-
-	//"github.com/mongodb/mongo-go-driver/mongo"
-	//"github.com/mongodb/mongo-go-driver/bson"
-	//"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/gorilla/securecookie"
+	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
-	//"log"
 )
 
 // Test struct for testing
@@ -29,7 +27,7 @@ type User struct {
 }
 
 //Session var
-var store = sessions.NewCookieStore([]byte("asdaskdhasdhgsajdgasdsadksakdhasidoajsdousahdopj"))
+var store = sessions.NewCookieStore(securecookie.GenerateRandomKey(32))
 
 // Wrap mux router in a function for testing
 func newRouter() *mux.Router {
@@ -37,17 +35,25 @@ func newRouter() *mux.Router {
 
 	// Diferent path - method handlers
 	router.HandleFunc("/", rootHandler).Methods("GET")
+	router.HandleFunc("/home", homeHandler).Methods("GET")
+	router.HandleFunc("/user", userHandler).Methods("GET")
+	router.HandleFunc("/saved", savedHandler).Methods("GET")
+
+	router.HandleFunc("/logout", logoutHandler).Methods("POST")
+
+	router.HandleFunc("/login", loginGetHandler).Methods("GET")
+	router.HandleFunc("/login", loginPostHandler).Methods("POST")
+
 	router.HandleFunc("/signup", signupGetHandler).Methods("GET")
 	router.HandleFunc("/signup", signupPostHandler).Methods("POST")
-	router.HandleFunc("/login", loginHandler).Methods("GET")
-	router.HandleFunc("/test", testHandler).Methods("GET")
+
 	router.HandleFunc("/stegano", steganoGetHandler).Methods("GET")
 	router.HandleFunc("/stegano", steganoPostHandler).Methods("POST")
 
 	router.HandleFunc("/caesar", caesarGetHandler).Methods("GET")
 	router.HandleFunc("/caesar", caesarPostHandler).Methods("POST")
-	router.HandleFunc("/login", postLoginHandler).Methods("POST")
-	router.HandleFunc("/home", homeHandler)
+
+	router.HandleFunc("/test", testHandler).Methods("GET")
 
 	// Static file directory
 	staticFileDirectory := http.Dir("./assets/")
@@ -58,22 +64,100 @@ func newRouter() *mux.Router {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("assets/html/index.html")
-	if err != nil {
-		panic(err)
-	}
-	t.Execute(w, nil /*Test{"Best page title", `assets/images/plain/smaller_image.jpeg`}*/)
-}
 
-func signupGetHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("assets/html/signup.html")
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/home", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/index.html")
 	if err != nil {
 		panic(err)
 	}
 	t.Execute(w, nil)
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/home.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func userHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/user.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func savedHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/savedData.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/home.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func loginGetHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/home", http.StatusSeeOther) // Redirect to home
+		return
+	}
+
 	t, err := template.ParseFiles("assets/html/login.html")
 	if err != nil {
 		panic(err)
@@ -81,63 +165,78 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, nil)
 }
 
-func steganoGetHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("assets/html/stegano.html")
+func loginPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/home", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	var errorSlice []string
+
+	email := r.FormValue("username")
+	pass := r.FormValue("pass")
+
+	match, err := regexp.MatchString("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", email)
+	returnEmptyError(err)
+	if !match {
+		errorSlice = append(errorSlice, "Email does not meet the requirements")
+	}
+
+	_, err = bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	returnEmptyError(err)
+
+	coll := conn.DB("stegano").C("users")
+	result := User{}
+	err = coll.Find(bson.M{"email": email}).Select(bson.M{"user": 1}).One(&result)
+	if err != nil {
+		panic(err)
+	}
+
+	if result.User == "" {
+		//TODO handle username or password incorrect
+		http.Error(w, "404", 404)
+		return
+	}
+
+	// Set some session values.
+	session.Values["user"] = result.User
+	// Save it before we write to the response/return from the handler.
+	session.Save(r, w)
+
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
+
+}
+
+func signupGetHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/home", http.StatusSeeOther) // Redirect to home
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/signup.html")
 	if err != nil {
 		panic(err)
 	}
 	t.Execute(w, nil)
 }
 
-func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
-
-	// Check if textfield is empty
-	if len(r.FormValue("text")) == 0 {
-		fmt.Println("Empty text field")
-		return
-	}
-
-	// Check if image is uploaded successfully
-	file, _, err := r.FormFile("image")
-	if err != nil {
-		fmt.Println("Empty image")
-		return
-	}
-
-	text := r.FormValue("text") // Get the text received
-
-	err = file.Close() // Close the file
-	if err != nil {
-		return
-	}
-
-	imgBin, err := encode(file, text)
-	if err != nil {
-		return
-	}
+func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	session, err := store.Get(r, "user-login")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	returnEmptyError(err)
+	// Check if session is set
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to homepage
 		return
 	}
-	if session.Values["user"] == "" {
-		//TODO: don't show anything
-		http.Error(w, err.Error(), 404)
-		return
-	}
-
-	sessionUser := session.Values["user"]
-
-	// Store the image into DB
-	err = storeImage(sessionUser, imgBin)
-	if err != nil {
-		return
-	}
-
-}
-
-func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get the fields
 	user := r.FormValue("displayName")
@@ -164,41 +263,91 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 	err = addUser(user, email, string(hashPass))
 	returnEmptyError(err)
 
-	session, err := store.Get(r, "user-login")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	// Set some session values.
 	session.Values["user"] = user
-	//session.Values[] = 43
 	// Save it before we write to the response/return from the handler.
 	session.Save(r, w)
 
 	http.Redirect(w, r, "/home", http.StatusSeeOther)
 
-	// w.Write([]byte("This seems to work"))
-	fmt.Fprintf(w, "This seems to work")
+}
+
+func steganoGetHandler(w http.ResponseWriter, r *http.Request) {
+
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	// Check if session is set
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to homepage
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/stegano.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	// Check if session is set
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to homepage
+		return
+	}
+
+	// Check if textfield is empty
+	if len(r.FormValue("text")) == 0 {
+		fmt.Println("Empty text field")
+		return
+	}
+
+	// Check if image is uploaded successfully
+	file, _, err := r.FormFile("image")
+	if err != nil {
+		fmt.Println("Empty image")
+		return
+	}
+
+	text := r.FormValue("text") // Get the text received
+
+	err = file.Close() // Close the file
+	if err != nil {
+		return
+	}
+
+	imgBin, err := encode(file, text)
+	if err != nil {
+		return
+	}
+
+	sessionUser := session.Values["user"].(string)
+
+	// Store the image into DB
+	err = storeImage(sessionUser, imgBin)
+	if err != nil {
+		return
+	}
+
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
 
-	counter := 1
-	
+	// Check if session is set
 	session, err := store.Get(r, "user-login")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
 		return
 	}
-	if session.Values["user"] == "" {
-		//TODO: don't show anything
-		http.Error(w, err.Error(), 404)
-		return
-	}
-	
+
+	counter := 1
+
 	// Get the user based on the session info
-	sessionUser := session.Values["user"]
+	sessionUser := session.Values["user"].(string)
 
 	err = decode(sessionUser)
 	if err != nil {
@@ -239,6 +388,15 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 
 /* CAESAR's CIPHER */
 func caesarGetHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
 	t, err := template.ParseFiles("assets/html/caesar.html")
 	if err != nil {
 		panic(err)
@@ -247,6 +405,14 @@ func caesarGetHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
 
 	// Check if textfield is empty
 	if len(r.FormValue("plaintext")) == 0 {
@@ -264,71 +430,4 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, ciphertext)
 
-}
-
-func postLoginHandler(w http.ResponseWriter, r *http.Request) {
-
-	var errorSlice []string
-
-	email := r.FormValue("username")
-	pass := r.FormValue("pass")
-
-	fmt.Println(email)
-
-	match, err := regexp.MatchString("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", email)
-	returnEmptyError(err)
-	if !match {
-		errorSlice = append(errorSlice, "Email does not meet the requirements")
-	}
-
-	hashPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
-	returnEmptyError(err)
-
-	coll := conn.DB("stegano").C("users")
-	result := PassHASH{}
-	err = coll.Find(bson.M{"email": email}).Select(bson.M{"user": 1}).One(&result)
-	fmt.Println(result)
-	if err != nil {
-		panic(err)
-	}
-
-	if result.User == "" {
-		//TODO handle username or password incorrect
-		http.Error(w, "404", 404)
-		return
-	}
-
-	session, err := store.Get(r, "user-login")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Set some session values.
-	session.Values["user"] = result.User
-	//session.Values[] = 43
-	// Save it before we write to the response/return from the handler.
-	session.Save(r, w)
-
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
-
-}
-
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "user-login")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if session.Values["user"] == "" {
-		//TODO: don't show anything
-		http.Error(w, err.Error(), 404)
-		return
-	}
-
-	t, err := template.ParseFiles("assets/html/home.html")
-	if err != nil {
-		panic(err)
-	}
-	t.Execute(w, nil)
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,9 +8,6 @@ import (
 )
 
 func main() {
-
-	key, _ := getImages("username")
-	fmt.Println(key)
 
 	// Create a router
 	r := newRouter()

@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"image"
@@ -11,9 +9,7 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	"image/png"
-	"io/ioutil"
 	"mime/multipart"
-	"os"
 )
 
 // The bitmask that will be used (last two bits)
@@ -77,24 +73,4 @@ func encode(inputReader multipart.File, inputMessage string) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
-}
-
-// Base64 encode the image
-func image64Encode(path string) (string, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-
-	// Read entire JPG into byte slice
-	reader := bufio.NewReader(f)
-	content, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return "", err
-	}
-
-	// Encode as base64
-	encoded := base64.StdEncoding.EncodeToString(content)
-
-	return encoded, nil
 }

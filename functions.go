@@ -14,6 +14,13 @@ func errorPanic(err error) {
 	}
 }
 
+// Metalinter
+func returnEmptyError(err error) {
+	if err != nil {
+		return
+	}
+}
+
 // Output file name
 func outputName(inputFN string) string {
 	output := inputFN

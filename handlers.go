@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
-	"regexp"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -114,59 +113,14 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 
 func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 
-	var errorSlice []string
-
+	// Get the fields
 	user := r.FormValue("displayName")
 	email := r.FormValue("email")
 	pass := r.FormValue("pass")
 	passConfirm := r.FormValue("passConfirm")
 
-	// Check if username is OK
-	match, err := regexp.MatchString(`^[a-zA-Z0-9_-]{6,30}$`, user)
-	returnEmptyError(err)
-	if !match {
-		errorSlice = append(errorSlice, "Username does not meet the requirements")
-	}
-
-	// Check if email is OK
-	match, err = regexp.MatchString("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", email)
-	returnEmptyError(err)
-	if !match {
-		errorSlice = append(errorSlice, "Email does not meet the requirements")
-	}
-
-	// Check if password is OK
-	match, err = regexp.MatchString(`^.{6,40}$`, pass)
-	returnEmptyError(err)
-	if !match {
-		errorSlice = append(errorSlice, "Password does not meet the requirements")
-	}
-
-	// Check if confrimPassword is OK
-	match, err = regexp.MatchString(`^.{6,40}$`, passConfirm)
-	returnEmptyError(err)
-	if !match {
-		errorSlice = append(errorSlice, "Confirmation password does not meet the requirements")
-	}
-
-	// Check if email exists
-	exists, err := entryExists("email", email, "users")
-	returnEmptyError(err)
-	if exists {
-		errorSlice = append(errorSlice, "Email already exists")
-	}
-
-	// Check if username exists
-	exists, err = entryExists("user", user, "users")
-	returnEmptyError(err)
-	if exists {
-		errorSlice = append(errorSlice, "Username already exists")
-	}
-
-	// Check if passwords are the same
-	if pass != passConfirm {
-		errorSlice = append(errorSlice, "Passwords do not match")
-	}
+	// Validate the fields
+	errorSlice := validateSignup(user, pass, passConfirm, email)
 
 	// Check if there are any errors
 	if len(errorSlice) > 0 {
@@ -184,7 +138,8 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 	err = addUser(user, email, string(hashPass))
 	returnEmptyError(err)
 
-
+	// w.Write([]byte("This seems to work"))
+	fmt.Fprintf(w, "This seems to work")
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {

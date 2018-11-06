@@ -42,9 +42,13 @@ $(document).ready(function (e) {
                 data: formData,
                 processData: false,
                 contentType: false,
-                success: function() {
-                    $('#loading').hide();
-                    $('#message').html(data);
+                success: function(data) {
+                  
+                    if(data == 1) {
+                      $('#loading').hide();
+                      window.location.replace("saved");
+                    }
+
                 }
             });
 

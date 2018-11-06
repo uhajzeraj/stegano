@@ -21,6 +21,11 @@ type Test struct {
 	ImgEncode []string
 }
 
+// SavedData structure for showing images and their info
+type SavedData struct {
+	Images []string
+}
+
 // User struct
 type User struct {
 	User string `bson:"user"`
@@ -124,11 +129,35 @@ func savedHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sessionUser := session.Values["user"].(string)
+	counter := 1
+
+	// Fetch images from Mongo
+	images, err := getImages(sessionUser)
+	returnEmptyError(err)
+
+	for _, val := range images {
+
+		// Save new image here
+		err = ioutil.WriteFile("assets/images/"+sessionUser+strconv.Itoa(counter)+".png", val, 0644)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		counter++
+	}
+
+	savedImages := SavedData{}
+
+	for i := 1; i < counter; i++ {
+		savedImages.Images = append(savedImages.Images, "assets/images/"+sessionUser+strconv.Itoa(i)+".png")
+	}
+
 	t, err := template.ParseFiles("assets/html/savedData.html")
 	if err != nil {
 		panic(err)
 	}
-	t.Execute(w, nil)
+	t.Execute(w, savedImages)
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -332,6 +361,7 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Fprint(w, 1)
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
@@ -381,9 +411,6 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = t.Execute(w, test)
-	// if err == nil {
-	// 	// os.RemoveAll("assets/images/uranii")
-	// }
 }
 
 /* CAESAR's CIPHER */

@@ -5,10 +5,8 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
-	"regexp"
 	"strconv"
 
-	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
@@ -44,7 +42,7 @@ func newRouter() *mux.Router {
 	router.HandleFunc("/user", userHandler).Methods("GET")
 	router.HandleFunc("/saved", savedHandler).Methods("GET")
 
-	router.HandleFunc("/logout", logoutHandler).Methods("POST")
+	router.HandleFunc("/logout", logoutHandler).Methods("GET")
 
 	router.HandleFunc("/login", loginGetHandler).Methods("GET")
 	router.HandleFunc("/login", loginPostHandler).Methods("POST")
@@ -170,11 +168,11 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t, err := template.ParseFiles("assets/html/home.html")
-	if err != nil {
-		panic(err)
-	}
-	t.Execute(w, nil)
+	// Remove session
+	delete(session.Values, "user")
+	session.Save(r, w)
+	// Redirect to index
+	http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
 }
 
 func loginGetHandler(w http.ResponseWriter, r *http.Request) {
@@ -204,39 +202,24 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var errorSlice []string
-
-	email := r.FormValue("username")
+	user := r.FormValue("username")
 	pass := r.FormValue("pass")
 
-	match, err := regexp.MatchString("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", email)
-	returnEmptyError(err)
-	if !match {
-		errorSlice = append(errorSlice, "Email does not meet the requirements")
-	}
+	errorSlice := validateLogin(user, pass)
 
-	_, err = bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
-	returnEmptyError(err)
-
-	coll := conn.DB("stegano").C("users")
-	result := User{}
-	err = coll.Find(bson.M{"email": email}).Select(bson.M{"user": 1}).One(&result)
-	if err != nil {
-		panic(err)
-	}
-
-	if result.User == "" {
-		//TODO handle username or password incorrect
-		http.Error(w, "404", 404)
+	if len(errorSlice) > 0 {
+		for _, val := range errorSlice {
+			fmt.Println(val)
+		}
 		return
 	}
 
 	// Set some session values.
-	session.Values["user"] = result.User
+	session.Values["user"] = user
 	// Save it before we write to the response/return from the handler.
 	session.Save(r, w)
 
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	fmt.Fprint(w, 1)
 
 }
 

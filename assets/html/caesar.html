@@ -82,8 +82,10 @@
                         <label for="comment" style="font-weight:bold;">Plaintext:</label>
                         <textarea class="form-control" rows="5" id="plaintext" name="plaintext"></textarea>
                         <br>
-                        <button class="btn btn-lg btn-primary" id="upload-button" type="submit" >Encrypt text</button>
-
+                        <label for="shiftSize" style="font-weight:bold;">Shift for:</label>
+                        <input class="form-control" type="number" name="shiftSize" id="shiftSize" placeholder="Min: 1, Max: 25"
+           min="1" max="25" style="width:30%;margin-left:5px;display:inline;"/>
+                        <button style="float:right;" class="btn btn-lg btn-primary" id="upload-button" type="submit" >Encrypt text</button>
                         <br><br>
                         <div class="alert alert-info" id="loading" style="display: none;" role="alert">
                             Encoding image...
@@ -96,7 +98,7 @@
                     </div>
                     <div style="width: 50%;float: right;">
                         <label for="comment" style="font-weight:bold;">Ciphertext:</label>
-                        <textarea readonly class="form-control" rows="5" id="ciphertext" name="ciphertext">{{.}}</textarea>
+                        <textarea readonly class="form-control" rows="5" id="ciphertext" name="ciphertext"></textarea>
                         <br>
 
                     </div>

@@ -198,8 +198,9 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	plaintext := r.FormValue("plaintext") // Get the text received
+	shiftSize := r.FormValue("shiftSize")
 
-	ciphertext := encodeCaesar(plaintext)
+	ciphertext := encodeCaesar(plaintext, shiftSize)
 
 	fmt.Fprint(w, ciphertext)
 

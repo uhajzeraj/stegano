@@ -1,17 +1,22 @@
 package main
 
 import (
+	//"github.com/mongodb/mongo-go-driver/core/result"
 	"context"
 	"fmt"
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strconv"
-
+	"github.com/gorilla/sessions"
+	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/mux"
-	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
+	//"github.com/mongodb/mongo-go-driver/bson"
+	//"github.com/mongodb/mongo-go-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
 // Test struct for testing
@@ -19,6 +24,13 @@ type Test struct {
 	Title     string
 	ImgEncode []string
 }
+
+type User struct {
+	PassHash string
+}
+
+//Session var
+var store = sessions.NewCookieStore([]byte("asdaskdhasdhgsajdgasdsadksakdhasidoajsdousahdopj"))
 
 // Wrap mux router in a function for testing
 func newRouter() *mux.Router {
@@ -35,6 +47,8 @@ func newRouter() *mux.Router {
 
 	router.HandleFunc("/caesar", caesarGetHandler).Methods("GET")
 	router.HandleFunc("/caesar", caesarPostHandler).Methods("POST")
+	router.HandleFunc("/login", postLoginHandler).Methods("POST")
+	router.HandleFunc("/home", homeHandler)
 
 	// Static file directory
 	staticFileDirectory := http.Dir("./assets/")
@@ -138,6 +152,20 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 	err = addUser(user, email, string(hashPass))
 	returnEmptyError(err)
 
+	session, err := store.Get(r, "user-login")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Set some session values.
+	session.Values["hash"] = string(hashPass)
+	//session.Values[] = 43
+	// Save it before we write to the response/return from the handler.
+	session.Save(r, w)
+
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
+
 	// w.Write([]byte("This seems to work"))
 	fmt.Fprintf(w, "This seems to work")
 }
@@ -190,8 +218,6 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-
-
 /* CAESAR's CIPHER */
 func caesarGetHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("assets/html/caesar.html")
@@ -217,3 +243,76 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func postLoginHandler(w http.ResponseWriter, r *http.Request) {
+
+	var errorSlice []string
+
+	email := r.FormValue("username")
+	pass := r.FormValue("pass")
+
+	match, err := regexp.MatchString("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", email)
+	returnEmptyError(err)
+	if !match {
+		errorSlice = append(errorSlice, "Email does not meet the requirements")
+	}
+
+	exists, err := entryExists("email", email, "users")
+	returnEmptyError(err)
+	if !exists {
+		errorSlice = append(errorSlice, "Email already exists")
+	}
+
+	hashPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	returnEmptyError(err)
+
+	coll := conn.DB("stegano").C("users")
+	result := User{}
+	err = coll.Find(bson.M{"email": email}).One(&result)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = coll.Find(bson.M{"email": email}).Select(bson.M{"hashPass": 0}).One(&result)
+	if err != nil {
+		panic(err)
+	}
+
+	if result.PassHash == "" {
+		//TODO handle username or password incorrect
+		http.Error(w, "404",404)
+		return
+	}
+
+	session, err := store.Get(r, "user-login")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Set some session values.
+	session.Values["hash"] = string(hashPass)
+	//session.Values[] = 43
+	// Save it before we write to the response/return from the handler.
+	session.Save(r, w)
+
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
+
+}
+
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, "user-login")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if session.Values["hash"] == "" {
+		//TODO: don't show anything
+		http.Error(w, err.Error(), 404)
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/home.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}

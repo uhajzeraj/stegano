@@ -14,6 +14,7 @@ type Images struct {
 	Images [][]byte `bson:"images"`
 }
 
+<<<<<<< HEAD
 // User struct fuck you
 // type User struct {
 // 	ID       bson.ObjectId `bson:"_id"`
@@ -23,6 +24,8 @@ type Images struct {
 // 	Images   [][]byte      `bson:"images"`
 // }
 
+=======
+>>>>>>> a0f998648fe62cd179639c750acbbb323118d040
 func storeImage(user string, encodedImg []byte) error {
 
 	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database

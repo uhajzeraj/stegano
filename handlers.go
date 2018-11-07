@@ -1,23 +1,20 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"html/template"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
 )
-
-// Test struct for testing
-type Test struct {
-	Title     string
-	ImgEncode []string
-}
 
 // SavedData structure for showing images and their info
 type SavedData struct {
@@ -55,8 +52,6 @@ func newRouter() *mux.Router {
 
 	router.HandleFunc("/caesar", caesarGetHandler).Methods("GET")
 	router.HandleFunc("/caesar", caesarPostHandler).Methods("POST")
-
-	router.HandleFunc("/test", testHandler).Methods("GET")
 
 	// Static file directory
 	staticFileDirectory := http.Dir("./assets/")
@@ -128,27 +123,21 @@ func savedHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionUser := session.Values["user"].(string)
-	counter := 1
 
 	// Fetch images from Mongo
 	images, err := getImages(sessionUser)
 	returnEmptyError(err)
 
+	savedImages := SavedData{}
+
 	for _, val := range images {
 
 		// Save new image here
-		err = ioutil.WriteFile("assets/images/"+sessionUser+strconv.Itoa(counter)+".png", val, 0644)
-		if err != nil {
-			fmt.Println(err)
-		}
+		err = ioutil.WriteFile("assets/images/"+val.Name+".png", val.Img, 0644)
+		returnEmptyError(err)
 
-		counter++
-	}
-
-	savedImages := SavedData{}
-
-	for i := 1; i < counter; i++ {
-		savedImages.Images = append(savedImages.Images, "assets/images/"+sessionUser+strconv.Itoa(i)+".png")
+		// Append the path for templating
+		savedImages.Images = append(savedImages.Images, "assets/images/"+val.Name+".png")
 	}
 
 	t, err := template.ParseFiles("assets/html/savedData.html")
@@ -280,7 +269,7 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Save it before we write to the response/return from the handler.
 	session.Save(r, w)
 
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	fmt.Fprint(w, 1)
 
 }
 
@@ -318,11 +307,15 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if image is uploaded successfully
-	file, _, err := r.FormFile("image")
+	file, fileHeader, err := r.FormFile("image")
 	if err != nil {
-		fmt.Println("Empty image")
 		return
 	}
+
+	title := []byte(time.Now().String() + fileHeader.Filename)
+	shaSum := sha256.Sum224(title)
+
+	fileName := hex.EncodeToString(shaSum[:])
 
 	text := r.FormValue("text") // Get the text received
 
@@ -339,61 +332,12 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 	sessionUser := session.Values["user"].(string)
 
 	// Store the image into DB
-	err = storeImage(sessionUser, imgBin)
+	err = storeImage(sessionUser, fileName, imgBin)
 	if err != nil {
 		return
 	}
 
 	fmt.Fprint(w, 1)
-}
-
-func testHandler(w http.ResponseWriter, r *http.Request) {
-
-	// Check if session is set
-	session, err := store.Get(r, "user-login")
-	returnEmptyError(err)
-	if len(session.Values) == 0 {
-		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
-		return
-	}
-
-	counter := 1
-
-	// Get the user based on the session info
-	sessionUser := session.Values["user"].(string)
-
-	err = decode(sessionUser)
-	if err != nil {
-		panic(err)
-	}
-
-	// Fetch images from Mongo
-	images, err := getImages(sessionUser)
-	returnEmptyError(err)
-
-	for _, val := range images {
-
-		// Save new image here
-		err = ioutil.WriteFile("assets/images/"+sessionUser+strconv.Itoa(counter)+".png", val, 0644)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		counter++
-
-	}
-
-	// HTML Templating
-	t, err := template.ParseFiles("assets/html/test.html")
-	returnEmptyError(err)
-
-	test := Test{Title: "Best page title"}
-
-	for i := 1; i < counter; i++ {
-		test.ImgEncode = append(test.ImgEncode, "assets/images/"+sessionUser+strconv.Itoa(i)+".png")
-	}
-
-	err = t.Execute(w, test)
 }
 
 /* CAESAR's CIPHER */

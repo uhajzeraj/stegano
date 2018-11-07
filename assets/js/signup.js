@@ -25,7 +25,11 @@ $(document).ready(function() {
         processData: false,
         contentType: false,
         success: function(data) {
-            
+          
+          if(data == 1) {
+            window.location.replace("home");
+          }
+
         }
       });
       

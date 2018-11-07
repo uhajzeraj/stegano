@@ -69,7 +69,7 @@ func entryExists(entry string, value string, collection string) (bool, error) {
 
 func getImages(user string) ([]Image, error) {
 
-	coll := conn.DB("stegano").C("users") // `images` collection, `stegano` database
+	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
 
 	var img Images
 
@@ -86,4 +86,20 @@ func getImages(user string) ([]Image, error) {
 	}
 
 	return img.Images, nil
+}
+
+func removeImage(user, imageName string) error {
+
+	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
+
+	// Remove the image
+	err := coll.Update(
+		bson.M{"user": user},
+		bson.M{"$pull": bson.M{"images": bson.M{"name": imageName}}},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

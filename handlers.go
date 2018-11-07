@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -52,6 +53,8 @@ func newRouter() *mux.Router {
 
 	router.HandleFunc("/caesar", caesarGetHandler).Methods("GET")
 	router.HandleFunc("/caesar", caesarPostHandler).Methods("POST")
+
+	router.HandleFunc("/deleteImg", deleteImgPostHandler).Methods("POST")
 
 	// Static file directory
 	staticFileDirectory := http.Dir("./assets/")
@@ -384,4 +387,32 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, ciphertext)
 
+}
+
+func deleteImgPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	// Check if textfield is empty
+	if len(r.FormValue("imgName")) == 0 {
+		return
+	}
+
+	sessionUser := session.Values["user"].(string)
+
+	// Trim the name of the image from the unneeded parts
+	imgName := r.FormValue("imgName")
+	imgName = strings.TrimPrefix(imgName, "assets/images/")
+	imgName = strings.TrimSuffix(imgName, ".png")
+
+	err = removeImage(sessionUser, imgName)
+	returnEmptyError(err)
+
+	fmt.Fprint(w, 1)
 }

@@ -7,3 +7,5 @@ encode_test.go
 functions_test.go
 mongo_test.go
 TODO
+.idea/
+metalinter

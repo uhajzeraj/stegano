@@ -14,34 +14,43 @@ function selectImage(e) {
 }
 
 
-$(document).ready(function (e) {
+$(document).ready(function () {
 
-  var maxsize = 500 * 1024; // 500 KB
+  var maxsize = 5000 * 1024; // 500 KB
 
   $('#max-size').html((maxsize/1024).toFixed(2));
 
-  $('#upload-image-form').on('submit', function(e) {
+    $(`#upload-button`).click(function(e) {
 
-    e.preventDefault();
+        e.preventDefault();
 
-    $('#message').empty();
-    $('#loading').show();
+        var formData = new FormData();
+        var text = $(`textarea#text`).val();
+        formData.append('text', text);
+        var image = $(`#file`)[0].files[0];
+        formData.append('image', image);
 
-    $.ajax({
-      url: "upload-image.php",
-      type: "POST",
-      data: new FormData(this),
-      contentType: false,
-      cache: false,
-      processData: false,
-      success: function(data)
-      {
-        $('#loading').hide();
-        $('#message').html(data);
-      }
+        $('#message').empty();
+        $('#loading').show();
+
+
+        $.ajax({
+            url: "stegano",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data) {
+              
+                if(data == 1) {
+                  $('#loading').hide();
+                  window.location.replace("saved");
+                }
+
+            }
+        });
+
     });
-
-  });
 
   $('#file').change(function() {
 

@@ -1,23 +1,34 @@
 package main
 
 import (
-	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"html/template"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/gorilla/securecookie"
+	"github.com/gorilla/sessions"
+	"golang.org/x/crypto/bcrypt"
 )
 
-// Test struct for testing
-type Test struct {
-	Title     string
-	ImgEncode []string
+// SavedData structure for showing images and their info
+type SavedData struct {
+	Images []string
 }
+
+// User struct
+type User struct {
+	User string `bson:"user"`
+}
+
+//Session var
+var store = sessions.NewCookieStore(securecookie.GenerateRandomKey(32))
 
 // Wrap mux router in a function for testing
 func newRouter() *mux.Router {
@@ -25,11 +36,25 @@ func newRouter() *mux.Router {
 
 	// Diferent path - method handlers
 	router.HandleFunc("/", rootHandler).Methods("GET")
-	router.HandleFunc("/signup", signupHandler).Methods("GET")
-	router.HandleFunc("/login", loginHandler).Methods("GET")
+	router.HandleFunc("/home", homeHandler).Methods("GET")
+	router.HandleFunc("/user", userHandler).Methods("GET")
+	router.HandleFunc("/saved", savedHandler).Methods("GET")
+
+	router.HandleFunc("/logout", logoutHandler).Methods("GET")
+
+	router.HandleFunc("/login", loginGetHandler).Methods("GET")
+	router.HandleFunc("/login", loginPostHandler).Methods("POST")
+
+	router.HandleFunc("/signup", signupGetHandler).Methods("GET")
+	router.HandleFunc("/signup", signupPostHandler).Methods("POST")
+
 	router.HandleFunc("/stegano", steganoGetHandler).Methods("GET")
-	router.HandleFunc("/test", testHandler).Methods("GET")
 	router.HandleFunc("/stegano", steganoPostHandler).Methods("POST")
+
+	router.HandleFunc("/caesar", caesarGetHandler).Methods("GET")
+	router.HandleFunc("/caesar", caesarPostHandler).Methods("POST")
+
+	router.HandleFunc("/deleteImg", deleteImgPostHandler).Methods("POST")
 
 	// Static file directory
 	staticFileDirectory := http.Dir("./assets/")
@@ -40,22 +65,118 @@ func newRouter() *mux.Router {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("assets/html/index.html")
-	if err != nil {
-		panic(err)
-	}
-	t.Execute(w, nil /*Test{"Best page title", `assets/images/plain/smaller_image.jpeg`}*/)
-}
 
-func signupHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("assets/html/signup.html")
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/home", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/index.html")
 	if err != nil {
 		panic(err)
 	}
 	t.Execute(w, nil)
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/home.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func userHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/user.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func savedHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	sessionUser := session.Values["user"].(string)
+
+	// Fetch images from Mongo
+	images, err := getImages(sessionUser)
+	returnEmptyError(err)
+
+	savedImages := SavedData{}
+
+	for _, val := range images {
+
+		// Save new image here
+		err = ioutil.WriteFile("assets/images/"+val.Name+".png", val.Img, 0644)
+		returnEmptyError(err)
+
+		// Append the path for templating
+		savedImages.Images = append(savedImages.Images, "assets/images/"+val.Name+".png")
+	}
+
+	t, err := template.ParseFiles("assets/html/savedData.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, savedImages)
+}
+
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	// Remove session
+	delete(session.Values, "user")
+	session.Save(r, w)
+	// Redirect to index
+	http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+}
+
+func loginGetHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/home", http.StatusSeeOther) // Redirect to home
+		return
+	}
+
 	t, err := template.ParseFiles("assets/html/login.html")
 	if err != nil {
 		panic(err)
@@ -63,8 +184,109 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, nil)
 }
 
+func loginPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/home", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	user := r.FormValue("username")
+	pass := r.FormValue("pass")
+
+	errorSlice := validateLogin(user, pass)
+
+	if len(errorSlice) > 0 {
+		for _, val := range errorSlice {
+			fmt.Println(val)
+		}
+		return
+	}
+
+	// Set some session values.
+	session.Values["user"] = user
+	// Save it before we write to the response/return from the handler.
+	session.Save(r, w)
+
+	fmt.Fprint(w, 1)
+
+}
+
+func signupGetHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/home", http.StatusSeeOther) // Redirect to home
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/signup.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func signupPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	// Check if session is set
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to homepage
+		return
+	}
+
+	// Get the fields
+	user := r.FormValue("displayName")
+	email := r.FormValue("email")
+	pass := r.FormValue("pass")
+	passConfirm := r.FormValue("passConfirm")
+
+	// Validate the fields
+	errorSlice := validateSignup(user, pass, passConfirm, email)
+
+	// Check if there are any errors
+	if len(errorSlice) > 0 {
+		for _, val := range errorSlice {
+			fmt.Println(val)
+		}
+		return
+	}
+
+	// Hash the password
+	hashPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	returnEmptyError(err)
+
+	// Add the user in the database
+	err = addUser(user, email, string(hashPass))
+	returnEmptyError(err)
+
+	// Set some session values.
+	session.Values["user"] = user
+	// Save it before we write to the response/return from the handler.
+	session.Save(r, w)
+
+	fmt.Fprint(w, 1)
+
+}
+
 func steganoGetHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("assets/html/test_stegano.html")
+
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	// Check if session is set
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to homepage
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/stegano.html")
 	if err != nil {
 		panic(err)
 	}
@@ -73,6 +295,14 @@ func steganoGetHandler(w http.ResponseWriter, r *http.Request) {
 
 func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	// Check if session is set
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to homepage
+		return
+	}
+
 	// Check if textfield is empty
 	if len(r.FormValue("text")) == 0 {
 		fmt.Println("Empty text field")
@@ -80,11 +310,15 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if image is uploaded successfully
-	file, _, err := r.FormFile("image")
+	file, fileHeader, err := r.FormFile("image")
 	if err != nil {
-		fmt.Println("Empty image")
 		return
 	}
+
+	title := []byte(time.Now().String() + fileHeader.Filename)
+	shaSum := sha256.Sum224(title)
+
+	fileName := hex.EncodeToString(shaSum[:])
 
 	text := r.FormValue("text") // Get the text received
 
@@ -93,71 +327,92 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// textBytes := []byte(text)
-
 	imgBin, err := encode(file, text)
 	if err != nil {
 		return
 	}
 
-	// Create connection to mongoDB
-	conn, err := mongoConnect()
-	errorPanic(err)
-	coll := conn.Database("stegano").Collection("images")
+	sessionUser := session.Values["user"].(string)
 
-	// Insert image into mongoDB
-	coll.InsertOne(context.Background(),
-		bson.NewDocument(
-			bson.EC.Binary("imgBin", imgBin),
-		),
-	)
+	// Store the image into DB
+	err = storeImage(sessionUser, fileName, imgBin)
+	if err != nil {
+		return
+	}
+
+	fmt.Fprint(w, 1)
+}
+
+/* CAESAR's CIPHER */
+func caesarGetHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/caesar.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	// Check if textfield is empty
+	if len(r.FormValue("plaintext")) == 0 {
+		fmt.Println("Empty text field")
+		return
+	}
+
+	plaintext := r.FormValue("plaintext") // Get the text received
+	shiftSize, err := strconv.Atoi(r.FormValue("shiftSize"))
+	if err != nil {
+		return
+	}
+
+	ciphertext := encodeCaesar(plaintext, shiftSize)
+
+	fmt.Fprint(w, ciphertext)
 
 }
 
-func testHandler(w http.ResponseWriter, r *http.Request) {
+func deleteImgPostHandler(w http.ResponseWriter, r *http.Request) {
 
-	counter := 1
-
-	// Create connection to mongo
-	conn, err := mongo.Connect(context.Background(), "mongodb://admin:connecttome123@ds151533.mlab.com:51533/stegano", nil)
-	if err != nil {
-		panic(err)
-	}
-	coll := conn.Database("stegano").Collection("images")
-
-	// Fetch image from mongo
-	cur, err := coll.Find(context.Background(), nil)
-	if err != nil {
-		panic(err)
-	}
-	var img map[string]interface{}       // Here we'll store fetched images
-	for cur.Next(context.Background()) { // Iterate the cursor
-		err := cur.Decode(&img) // Store fetched images
-		if err != nil {
-			panic(err)
-		}
-
-		// Save new image here
-		err = ioutil.WriteFile("assets/images/plain/image"+strconv.Itoa(counter)+".png", bson.Binary(img["imgBin"].(bson.Binary)).Data, 0644)
-		if err != nil {
-			panic(err)
-		}
-		counter++
-
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
 	}
 
-	// HTML Templating
-	t, err := template.ParseFiles("assets/html/test.html")
-	if err != nil {
-		panic(err)
+	// Check if textfield is empty
+	if len(r.FormValue("imgName")) == 0 {
+		return
 	}
 
-	test := Test{Title: "Best page title"}
+	sessionUser := session.Values["user"].(string)
 
-	for i := 1; i < counter; i++ {
-		test.ImgEncode = append(test.ImgEncode, "assets/images/plain/image"+strconv.Itoa(i)+".png")
-	}
+	// Trim the name of the image from the unneeded parts
+	imgName := r.FormValue("imgName")
+	imgName = strings.TrimPrefix(imgName, "assets/images/")
+	imgName = strings.TrimSuffix(imgName, ".png")
 
-	t.Execute(w, test)
+	err = removeImage(sessionUser, imgName)
+	returnEmptyError(err)
 
+	fmt.Fprint(w, 1)
 }

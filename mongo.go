@@ -1,33 +1,34 @@
 package main
 
 import (
-	"context"
-
-	_ "crypto/sha256"
-
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 )
 
-// Returns a mongo client to use for interactions with the database
-func mongoConnect() (*mongo.Client, error) {
-	// Connect to OpenStack remote MongoDB
-	conn, err := mongo.Connect(context.Background(), "mongodb://admin:connecttome123@ds151533.mlab.com:51533/stegano", nil)
-	if err != nil {
-		return nil, err
-	}
-	return conn, nil
+var (
+	conn, _ = mgo.Dial("mongodb://admin:connecttome123@ds151533.mlab.com:51533/stegano")
+)
+
+// Images struct for storing fetched images
+type Images struct {
+	Images []Image `bson:"images"`
 }
 
-func storeImage(client *mongo.Client, encodedImg string) error {
+// Image struct for storig one image
+type Image struct {
+	Name string `bson:"name"`
+	Img  []byte `bson:"img"`
+}
 
-	coll := client.Database("stegano").Collection("images") // `images` collection, `stegano` database
+func storeImage(user, imageName string, encodedImg []byte) error {
 
-	_, err := coll.InsertOne(context.Background(), // Insert base64 encoding of image in the database
-		bson.NewDocument(
-			bson.EC.String("imgEncoding", encodedImg),
-		))
+	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
 
+	// Insert image into collection
+	err := coll.Update(
+		bson.M{"user": user},
+		bson.M{"$push": bson.M{"images": bson.M{"name": imageName, "img": encodedImg}}},
+	)
 	if err != nil {
 		return err
 	}
@@ -35,23 +36,70 @@ func storeImage(client *mongo.Client, encodedImg string) error {
 	return nil
 }
 
-func getImage(client *mongo.Client) (map[string]interface{}, error) {
+func addUser(user, email, passHash string) error {
 
-	coll := client.Database("stegano").Collection("images") // `images` collection, `stegano` database
+	coll := conn.DB("stegano").C("users")
+	err := coll.Insert(
+		bson.M{
+			"user":     user,
+			"email":    email,
+			"passHash": passHash},
+	)
+	if err != nil {
+		return err
+	}
 
-	cur, err := coll.Find(context.Background(), nil) // Find all occurences
+	return nil
+}
+
+func entryExists(entry string, value string, collection string) (bool, error) {
+
+	coll := conn.DB("stegano").C(collection)
+	count, err := coll.Find(bson.M{entry: value}).Count()
+	if err != nil {
+		return false, err
+	}
+
+	if count > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func getImages(user string) ([]Image, error) {
+
+	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
+
+	var img Images
+
+	err := coll.Find(
+		bson.M{"user": user},
+	).Select(
+		bson.M{
+			"images": 1,
+		},
+	).One(&img)
+
 	if err != nil {
 		return nil, err
 	}
 
-	var img map[string]interface{} // Here we'll store fetched images
+	return img.Images, nil
+}
 
-	for cur.Next(context.Background()) { // Iterate the cursor
-		err := cur.Decode(&img) // Store fetched images
-		if err != nil {
-			return nil, err
-		}
+func removeImage(user, imageName string) error {
+
+	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
+
+	// Remove the image
+	err := coll.Update(
+		bson.M{"user": user},
+		bson.M{"$pull": bson.M{"images": bson.M{"name": imageName}}},
+	)
+	if err != nil {
+		return err
 	}
 
-	return img, nil
+	return nil
 }

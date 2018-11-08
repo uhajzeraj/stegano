@@ -8,6 +8,8 @@
 
 <link rel="stylesheet" href="assets/css/style.css">
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="assets/js/login.js"></script>
 
 </head>
 
@@ -26,10 +28,10 @@
 		
         <hr class="colorgraph">
         
-        <form action="">
+        <form action="" method="POST" novalidation>
           <div class="form-group">
-            <label for="email">Username:</label>
-            <input type="email" class="form-control" id="email" name="username">
+            <label for="user">Username:</label>
+            <input type="text" class="form-control" id="user" name="username">
           </div>
           <div class="form-group">
             <label for="pwd">Password:</label>
@@ -38,7 +40,7 @@
           <div class="checkbox">
             <label><input type="checkbox"> Remember me</label>
             
-          <button type="submit" class="btn btn-default" style="float:right;">Login</button>
+          <button type="submit" id="loginbtn" class="btn btn-default" style="float:right;">Login</button>
         </form>
     	
         <hr class="colorgraph">

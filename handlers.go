@@ -19,7 +19,8 @@ import (
 
 // SavedData structure for showing images and their info
 type SavedData struct {
-	Images []string
+	Image   string
+	Message string
 }
 
 // User struct
@@ -131,16 +132,23 @@ func savedHandler(w http.ResponseWriter, r *http.Request) {
 	images, err := getImages(sessionUser)
 	returnEmptyError(err)
 
-	savedImages := SavedData{}
-
+	savedImages := []SavedData{}
 	for _, val := range images {
+
+		savedImage := SavedData{}
+
+		// Decode the mesagge
+		message, err := decode(val.Img)
+		returnEmptyError(err)
 
 		// Save new image here
 		err = ioutil.WriteFile("assets/images/"+val.Name+".png", val.Img, 0644)
 		returnEmptyError(err)
 
-		// Append the path for templating
-		savedImages.Images = append(savedImages.Images, "assets/images/"+val.Name+".png")
+		// Append the path and message for templating
+		savedImage.Image = "assets/images/" + val.Name + ".png"
+		savedImage.Message = message
+		savedImages = append(savedImages, savedImage)
 	}
 
 	t, err := template.ParseFiles("assets/html/savedData.html")

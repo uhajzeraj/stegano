@@ -99,13 +99,17 @@
               </tr>
             </thead>
             <tbody>
-                {{range .Images}}
+                {{range .}}
                 <tr>
-                  <td><img src="{{.}}" width="100" height="100"></td>
-                  <td>The cipher used</td>
+                  <td><img src="{{.Image}}" width="100" height="100"></td>
+                  <td>
+                    <textarea rows="5" cols="40" style="overflow: auto; resize: none;" readonly>
+                      {{.Message}}
+                    </textarea>
+                  </td>
                   <td>
                       <div class="container">
-                          <a href="{{.}}" download><button type="button" id="download" class="btn btn-primary btn-md" style="width:25%;">Download</button></a>
+                          <a href="{{.Image}}" download><button type="button" id="download" class="btn btn-primary btn-md" style="width:25%;">Download</button></a>
                           <button id="delete" type="button" class="btn btn-danger btn-md" data-toggle="modal" data-target="#myModal" style="width:25%;margin-left:5px;">Delete</button>
 
                           

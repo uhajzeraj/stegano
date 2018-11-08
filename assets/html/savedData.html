@@ -2,6 +2,12 @@
 <html>
 <head>
 <meta charset="utf-8">
+
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>-->
+    <script src="assets/js/savedData.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
 <title>Saved Data</title>
 
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
@@ -41,19 +47,19 @@
 <nav class="w3-sidebar w3-bar-block w3-small w3-hide-small w3-center">
   <!-- Avatar image in top left corner 
   <img src="/w3images/avatar_smoke.jpg" style="width:100%">-->
-  <a href="home.html" class="w3-bar-item w3-button w3-padding-large">
+  <a href="home" class="w3-bar-item w3-button w3-padding-large">
     <i class="fa fa-home w3-xxlarge"></i>
     <p>HOME</p>
   </a>
-  <a href="user.html" class="w3-bar-item w3-button w3-padding-large">
+  <a href="user" class="w3-bar-item w3-button w3-padding-large">
     <i class="fa fa-user w3-xxlarge"></i>
     <p>USER</p>
   </a>
-  <a href="#" class="w3-bar-item w3-button w3-padding-large w3-black">
+  <a href="saved" class="w3-bar-item w3-button w3-padding-large w3-black">
     <i class="fa fa-database w3-xxlarge"></i>
     <p>SAVED DATA</p>
   </a>
-  <a style="margin-top:250%;margin-bottom:0px;" href="index.html" class="w3-bar-item w3-button w3-padding-large">
+  <a style="margin-top:250%;margin-bottom:0px;" href="logout" class="w3-bar-item w3-button w3-padding-large">
     <i class="fa fa-sign-out w3-xxlarge"></i>
     <p>LOG OUT</p>
   </a>
@@ -80,7 +86,7 @@
         <h1>Saved Data</h1>
         <br>
         
-        <div class="container-fluid">
+        <div class="container-fluid" id="data">
             <br>
             <table class="table table-hover">
             <thead>
@@ -92,30 +98,41 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>File name</td>
-                <td>The cipher used</td>
-                <td>
-                    <button type="button" id="download" class="btn btn-primary btn-md" style="width:25%;">Download</button>
-                    <button type="button" id="delete" class="btn btn-danger btn-md" style="width:25%;margin-left:5px;">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>File name</td>
-                <td>The cipher used</td>
-                <td>
-                    <button type="button" id="download" class="btn btn-primary btn-md" style="width:25%;">Download</button>
-                    <button type="button" id="delete" class="btn btn-danger btn-md" style="width:25%;margin-left:5px;">Delete</button>
-                </td>
-              </tr>
-              <tr>
-                <td>File name</td>
-                <td>The cipher used</td>
-                <td>
-                    <button type="button" id="download" class="btn btn-primary btn-md" style="width:25%;">Download</button>
-                    <button type="button" id="delete" class="btn btn-danger btn-md" style="width:25%;margin-left:5px;">Delete</button>
-                </td>
-              </tr>
+                {{range .Images}}
+                <tr>
+                  <td><img src="{{.}}" width="100" height="100"></td>
+                  <td>The cipher used</td>
+                  <td>
+                      <div class="container">
+                          <a href="{{.}}" download><button type="button" id="download" class="btn btn-primary btn-md" style="width:25%;">Download</button></a>
+                          <button id="delete" type="button" class="btn btn-danger btn-md" data-toggle="modal" data-target="#myModal" style="width:25%;margin-left:5px;">Delete</button>
+
+                          <!-- Modal -->
+                          <div class="modal fade" id="myModal" role="dialog">
+                              <div class="modal-dialog">
+
+                                  <!-- Modal content-->
+                                  <div class="modal-content container">
+                                      <div class="modal-header">
+                                          <h4 class="modal-title">Are you sure you want to delete this file?</h4>
+                                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                                      </div>
+                                      <div class="modal-body">
+                                          <button id="confirmDelete" type="button" class="btn btn-danger btn-lg" style="width: 20%;">Yes</button>
+                                          <button type="button" class="btn btn-success btn-lg" data-dismiss="modal" style="width: 20%;">No</button>
+                                      </div>
+                                      <div class="modal-footer">
+                                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                      </div>
+                                  </div>
+
+                              </div>
+                          </div>
+                      </div>
+                  </td>
+                </tr>
+              {{end}}
             </tbody>
           </table>
         </div>
@@ -141,8 +158,5 @@
 
 <!-- END PAGE CONTENT -->
 </div>
-
-<script src="../js/user.js"></script>
-
 </body>
 </html>

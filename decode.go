@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"image/color"
 )
@@ -16,7 +15,7 @@ func decode(sessionUser string) error {
 
 	for _, val := range imgs {
 
-		img, _, err := image.Decode(bytes.NewReader(val)) // decode the image
+		img, _, err := image.Decode(bytes.NewReader(val.Img)) // decode the image
 		if err != nil {
 			panic(err)
 		}
@@ -57,9 +56,6 @@ func decode(sessionUser string) error {
 				}
 			}
 		}
-		// newline
-		// fmt.Printf("\n")
-		fmt.Println(stringOutput)
 	}
 	return nil
 }

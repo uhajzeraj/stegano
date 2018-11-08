@@ -1,55 +1,34 @@
 package main
 
 import (
-<<<<<<< HEAD
-	//"github.com/mongodb/mongo-go-driver/core/result"
-
-=======
-
-	//"github.com/mongodb/mongo-go-driver/core/result"
-	//"context"
->>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"html/template"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"regexp"
 	"strconv"
+	"strings"
+	"time"
 
-	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/mux"
-<<<<<<< HEAD
+	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
-=======
-
-	//"github.com/mongodb/mongo-go-driver/mongo"
-	//"github.com/mongodb/mongo-go-driver/bson"
-	//"github.com/mongodb/mongo-go-driver/mongo"
-	"golang.org/x/crypto/bcrypt"
-	//"log"
->>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22
 )
 
-// Test struct for testing
-type Test struct {
-	Title     string
-	ImgEncode []string
+// SavedData structure for showing images and their info
+type SavedData struct {
+	Images []string
 }
 
-<<<<<<< HEAD
 // User struct
 type User struct {
-	PassHash string
-=======
-type PassHASH struct {
-	PassHash string `bson:"passHash"`
->>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22
+	User string `bson:"user"`
 }
 
 //Session var
-var store = sessions.NewCookieStore([]byte("asdaskdhasdhgsajdgasdsadksakdhasidoajsdousahdopj"))
+var store = sessions.NewCookieStore(securecookie.GenerateRandomKey(32))
 
 // Wrap mux router in a function for testing
 func newRouter() *mux.Router {
@@ -57,17 +36,25 @@ func newRouter() *mux.Router {
 
 	// Diferent path - method handlers
 	router.HandleFunc("/", rootHandler).Methods("GET")
+	router.HandleFunc("/home", homeHandler).Methods("GET")
+	router.HandleFunc("/user", userHandler).Methods("GET")
+	router.HandleFunc("/saved", savedHandler).Methods("GET")
+
+	router.HandleFunc("/logout", logoutHandler).Methods("GET")
+
+	router.HandleFunc("/login", loginGetHandler).Methods("GET")
+	router.HandleFunc("/login", loginPostHandler).Methods("POST")
+
 	router.HandleFunc("/signup", signupGetHandler).Methods("GET")
 	router.HandleFunc("/signup", signupPostHandler).Methods("POST")
-	router.HandleFunc("/login", loginHandler).Methods("GET")
-	router.HandleFunc("/test", testHandler).Methods("GET")
+
 	router.HandleFunc("/stegano", steganoGetHandler).Methods("GET")
 	router.HandleFunc("/stegano", steganoPostHandler).Methods("POST")
 
 	router.HandleFunc("/caesar", caesarGetHandler).Methods("GET")
 	router.HandleFunc("/caesar", caesarPostHandler).Methods("POST")
-	router.HandleFunc("/login", postLoginHandler).Methods("POST")
-	router.HandleFunc("/home", homeHandler)
+
+	router.HandleFunc("/deleteImg", deleteImgPostHandler).Methods("POST")
 
 	// Static file directory
 	staticFileDirectory := http.Dir("./assets/")
@@ -78,22 +65,118 @@ func newRouter() *mux.Router {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("assets/html/index.html")
-	if err != nil {
-		panic(err)
-	}
-	t.Execute(w, nil /*Test{"Best page title", `assets/images/plain/smaller_image.jpeg`}*/)
-}
 
-func signupGetHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("assets/html/signup.html")
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/home", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/index.html")
 	if err != nil {
 		panic(err)
 	}
 	t.Execute(w, nil)
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/home.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func userHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/user.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func savedHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	sessionUser := session.Values["user"].(string)
+
+	// Fetch images from Mongo
+	images, err := getImages(sessionUser)
+	returnEmptyError(err)
+
+	savedImages := SavedData{}
+
+	for _, val := range images {
+
+		// Save new image here
+		err = ioutil.WriteFile("assets/images/"+val.Name+".png", val.Img, 0644)
+		returnEmptyError(err)
+
+		// Append the path for templating
+		savedImages.Images = append(savedImages.Images, "assets/images/"+val.Name+".png")
+	}
+
+	t, err := template.ParseFiles("assets/html/savedData.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, savedImages)
+}
+
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	// Remove session
+	delete(session.Values, "user")
+	session.Save(r, w)
+	// Redirect to index
+	http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+}
+
+func loginGetHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/home", http.StatusSeeOther) // Redirect to home
+		return
+	}
+
 	t, err := template.ParseFiles("assets/html/login.html")
 	if err != nil {
 		panic(err)
@@ -101,50 +184,63 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, nil)
 }
 
-func steganoGetHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("assets/html/stegano.html")
+func loginPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/home", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	user := r.FormValue("username")
+	pass := r.FormValue("pass")
+
+	errorSlice := validateLogin(user, pass)
+
+	if len(errorSlice) > 0 {
+		for _, val := range errorSlice {
+			fmt.Println(val)
+		}
+		return
+	}
+
+	// Set some session values.
+	session.Values["user"] = user
+	// Save it before we write to the response/return from the handler.
+	session.Save(r, w)
+
+	fmt.Fprint(w, 1)
+
+}
+
+func signupGetHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/home", http.StatusSeeOther) // Redirect to home
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/signup.html")
 	if err != nil {
 		panic(err)
 	}
 	t.Execute(w, nil)
 }
 
-func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
-
-	// Check if textfield is empty
-	if len(r.FormValue("text")) == 0 {
-		fmt.Println("Empty text field")
-		return
-	}
-
-	// Check if image is uploaded successfully
-	file, _, err := r.FormFile("image")
-	if err != nil {
-		fmt.Println("Empty image")
-		return
-	}
-
-	text := r.FormValue("text") // Get the text received
-
-	err = file.Close() // Close the file
-	if err != nil {
-		return
-	}
-
-	imgBin, err := encode(file, text)
-	if err != nil {
-		return
-	}
-
-	// Store the image into DB
-	err = storeImage("uranii", imgBin)
-	if err != nil {
-		return
-	}
-
-}
-
 func signupPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	// Check if session is set
+	if len(session.Values) != 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to homepage
+		return
+	}
 
 	// Get the fields
 	user := r.FormValue("displayName")
@@ -171,74 +267,93 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 	err = addUser(user, email, string(hashPass))
 	returnEmptyError(err)
 
-	session, err := store.Get(r, "user-login")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	// Set some session values.
-	session.Values["hash"] = string(hashPass)
-	//session.Values[] = 43
+	session.Values["user"] = user
 	// Save it before we write to the response/return from the handler.
 	session.Save(r, w)
 
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	fmt.Fprint(w, 1)
 
-	// w.Write([]byte("This seems to work"))
-	fmt.Fprintf(w, "This seems to work")
-<<<<<<< HEAD
-=======
-
->>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22
 }
 
-func testHandler(w http.ResponseWriter, r *http.Request) {
+func steganoGetHandler(w http.ResponseWriter, r *http.Request) {
 
-	counter := 1
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	// Check if session is set
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to homepage
+		return
+	}
 
-	// Get the user based on the session info
-	sessionUser := "uranii" // This needs to be changed
-
-	err := decode(sessionUser)
+	t, err := template.ParseFiles("assets/html/stegano.html")
 	if err != nil {
 		panic(err)
 	}
+	t.Execute(w, nil)
+}
 
-	// Fetch images from Mongo
-	images, err := getImages(sessionUser)
+func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	session, err := store.Get(r, "user-login")
 	returnEmptyError(err)
-
-	for _, val := range images {
-
-		// Save new image here
-		err = ioutil.WriteFile("assets/images/"+sessionUser+strconv.Itoa(counter)+".png", val, 0644)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		counter++
-
+	// Check if session is set
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to homepage
+		return
 	}
 
-	// HTML Templating
-	t, err := template.ParseFiles("assets/html/test.html")
-	returnEmptyError(err)
-
-	test := Test{Title: "Best page title"}
-
-	for i := 1; i < counter; i++ {
-		test.ImgEncode = append(test.ImgEncode, "assets/images/"+sessionUser+strconv.Itoa(i)+".png")
+	// Check if textfield is empty
+	if len(r.FormValue("text")) == 0 {
+		fmt.Println("Empty text field")
+		return
 	}
 
-	err = t.Execute(w, test)
-	// if err == nil {
-	// 	// os.RemoveAll("assets/images/uranii")
-	// }
+	// Check if image is uploaded successfully
+	file, fileHeader, err := r.FormFile("image")
+	if err != nil {
+		return
+	}
+
+	title := []byte(time.Now().String() + fileHeader.Filename)
+	shaSum := sha256.Sum224(title)
+
+	fileName := hex.EncodeToString(shaSum[:])
+
+	text := r.FormValue("text") // Get the text received
+
+	err = file.Close() // Close the file
+	if err != nil {
+		return
+	}
+
+	imgBin, err := encode(file, text)
+	if err != nil {
+		return
+	}
+
+	sessionUser := session.Values["user"].(string)
+
+	// Store the image into DB
+	err = storeImage(sessionUser, fileName, imgBin)
+	if err != nil {
+		return
+	}
+
+	fmt.Fprint(w, 1)
 }
 
 /* CAESAR's CIPHER */
 func caesarGetHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
 	t, err := template.ParseFiles("assets/html/caesar.html")
 	if err != nil {
 		panic(err)
@@ -247,6 +362,14 @@ func caesarGetHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
 
 	// Check if textfield is empty
 	if len(r.FormValue("plaintext")) == 0 {
@@ -266,79 +389,30 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func postLoginHandler(w http.ResponseWriter, r *http.Request) {
+func deleteImgPostHandler(w http.ResponseWriter, r *http.Request) {
 
-	var errorSlice []string
-
-	email := r.FormValue("username")
-	pass := r.FormValue("pass")
-
-	fmt.Println(email)
-
-	match, err := regexp.MatchString("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", email)
-	returnEmptyError(err)
-	if !match {
-		errorSlice = append(errorSlice, "Email does not meet the requirements")
-	}
-
-	// exists, err := entryExists("email", email, "users")
-	// returnEmptyError(err)
-	// if !exists {
-	// 	errorSlice = append(errorSlice, "Email already exists")
-	// }
-
-	hashPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
-	returnEmptyError(err)
-
-	coll := conn.DB("stegano").C("users")
-	result := PassHASH{}
-	err = coll.Find(bson.M{"email": email}).Select(bson.M{"hashPass": 1}).One(&result)
-	fmt.Println(result)
-	if err != nil {
-		panic(err)
-	}
-
-	if result.PassHash == "" {
-		//TODO handle username or password incorrect
-		http.Error(w, "404", 404)
-		return
-	}
-
+	// Check if session is set
 	session, err := store.Get(r, "user-login")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
 		return
 	}
 
-	// Set some session values.
-	session.Values["hash"] = string(hashPass)
-	//session.Values[] = 43
-	// Save it before we write to the response/return from the handler.
-	session.Save(r, w)
+	// Check if textfield is empty
+	if len(r.FormValue("imgName")) == 0 {
+		return
+	}
 
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	sessionUser := session.Values["user"].(string)
 
+	// Trim the name of the image from the unneeded parts
+	imgName := r.FormValue("imgName")
+	imgName = strings.TrimPrefix(imgName, "assets/images/")
+	imgName = strings.TrimSuffix(imgName, ".png")
+
+	err = removeImage(sessionUser, imgName)
+	returnEmptyError(err)
+
+	fmt.Fprint(w, 1)
 }
-
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "user-login")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if session.Values["hash"] == "" {
-		//TODO: don't show anything
-		http.Error(w, err.Error(), 404)
-		return
-	}
-
-	t, err := template.ParseFiles("assets/html/home.html")
-	if err != nil {
-		panic(err)
-	}
-	t.Execute(w, nil)
-}
-<<<<<<< HEAD
-=======
-
->>>>>>> b4cb5a78469e23859ad216990709710fddfc6d22

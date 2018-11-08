@@ -11,17 +11,23 @@ var (
 
 // Images struct for storing fetched images
 type Images struct {
-	Images [][]byte `bson:"images"`
+	Images []Image `bson:"images"`
 }
 
-func storeImage(user string, encodedImg []byte) error {
+// Image struct for storig one image
+type Image struct {
+	Name string `bson:"name"`
+	Img  []byte `bson:"img"`
+}
+
+func storeImage(user, imageName string, encodedImg []byte) error {
 
 	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
 
 	// Insert image into collection
 	err := coll.Update(
 		bson.M{"user": user},
-		bson.M{"$push": bson.M{"images": encodedImg}},
+		bson.M{"$push": bson.M{"images": bson.M{"name": imageName, "img": encodedImg}}},
 	)
 	if err != nil {
 		return err
@@ -61,9 +67,9 @@ func entryExists(entry string, value string, collection string) (bool, error) {
 	return false, nil
 }
 
-func getImages(user string) ([][]byte, error) {
+func getImages(user string) ([]Image, error) {
 
-	coll := conn.DB("stegano").C("users") // `images` collection, `stegano` database
+	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
 
 	var img Images
 
@@ -80,4 +86,20 @@ func getImages(user string) ([][]byte, error) {
 	}
 
 	return img.Images, nil
+}
+
+func removeImage(user, imageName string) error {
+
+	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
+
+	// Remove the image
+	err := coll.Update(
+		bson.M{"user": user},
+		bson.M{"$pull": bson.M{"images": bson.M{"name": imageName}}},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

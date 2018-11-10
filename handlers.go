@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -51,9 +53,13 @@ func newRouter() *mux.Router {
 
 	router.HandleFunc("/stegano", steganoGetHandler).Methods("GET")
 	router.HandleFunc("/stegano", steganoPostHandler).Methods("POST")
+	router.HandleFunc("/steganoDecode", steganoDecodeHandler).Methods("POST")
 
 	router.HandleFunc("/caesar", caesarGetHandler).Methods("GET")
 	router.HandleFunc("/caesar", caesarPostHandler).Methods("POST")
+
+	router.HandleFunc("/rot13", rot13GetHandler).Methods("GET")
+	router.HandleFunc("/rot13", rot13PostHandler).Methods("POST")
 
 	router.HandleFunc("/deleteImg", deleteImgPostHandler).Methods("POST")
 
@@ -351,6 +357,41 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, 1)
 }
 
+func steganoDecodeHandler(w http.ResponseWriter, r *http.Request) {
+
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	// Check if session is set
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to homepage
+		return
+	}
+
+	// Check if image is uploaded successfully
+	file, _, err := r.FormFile("image")
+	if err != nil {
+		return
+	}
+
+	buf := bytes.NewBuffer(nil)
+	_, err = io.Copy(buf, file)
+	if err != nil {
+		return
+	}
+
+	// Decode the message
+	message, err := decode(buf.Bytes())
+	returnEmptyError(err)
+
+	err = file.Close() // Close the file
+	if err != nil {
+		return
+	}
+
+	fmt.Fprint(w, message)
+}
+
+
 /* CAESAR's CIPHER */
 func caesarGetHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -392,6 +433,48 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ciphertext := encodeCaesar(plaintext, shiftSize)
+
+	fmt.Fprint(w, ciphertext)
+
+}
+
+/* ROT 13 CIPHER */
+func rot13GetHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	t, err := template.ParseFiles("assets/html/rot13.html")
+	if err != nil {
+		panic(err)
+	}
+	t.Execute(w, nil)
+}
+
+func rot13PostHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	// Check if textfield is empty
+	if len(r.FormValue("plaintext")) == 0 {
+		fmt.Println("Empty text field")
+		return
+	}
+
+	input := r.FormValue("plaintext") // Get the text received
+
+	ciphertext := strings.Map(rot13, input)
 
 	fmt.Fprint(w, ciphertext)
 

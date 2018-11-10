@@ -33,7 +33,6 @@ $(document).ready(function () {
         $('#message').empty();
         $('#loading').show();
 
-
         $.ajax({
             url: "stegano",
             type: "POST",
@@ -85,4 +84,40 @@ $(document).ready(function () {
 
   });
 
+
+  // Decode the encrypted file with stegano:
+  $('#decryptStegano').click(function (e) {
+
+      e.preventDefault();
+
+      var formData = new FormData();
+      var image = $(`#file`)[0].files[0];
+      formData.append('image', image);
+
+      $('#encoding').hide();
+      $('#decoding').show();
+
+      $.ajax({
+          url: "steganoDecode",
+          type: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function(response) {
+              $(`textarea#decodedText`).val(response);
+          }
+      });
+
+  })
+
+    // Decode the encrypted file with stegano:
+    $('#returnToEncryption').click(function (e) {
+
+        e.preventDefault();
+
+        $('#decoding').hide();
+        $('#encoding').show();
+    })
+
 });
+

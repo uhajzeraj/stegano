@@ -20,7 +20,6 @@ $(document).ready(function() {
                 if(data == 1) {
                     imageRow.remove();
                 }
-    
             }
         });
     });

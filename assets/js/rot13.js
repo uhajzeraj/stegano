@@ -10,7 +10,7 @@ $(document).ready(function() {
         $('#loading').show();
 
         $.ajax({
-            url: "caesar",
+            url: "rot13",
             type: "POST",
             data: formData,
             processData: false,
@@ -20,5 +20,7 @@ $(document).ready(function() {
                 $(`textarea#ciphertext`).val(response);
             }
         });
+
+
     });
 });

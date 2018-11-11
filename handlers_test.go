@@ -71,7 +71,7 @@ func Test_userHandler_notImplemented(t *testing.T) {
 	}
 }
 
-func Test_savedHandler_notImplemeted(t *testing.T){
+func Test_savedHandler_notImplemeted(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(savedHandler))
 	defer ts.Close()
 
@@ -91,7 +91,7 @@ func Test_savedHandler_notImplemeted(t *testing.T){
 		return
 	}
 }
-func Test_logoutHandler_notImplemented(t *testing.T){
+func Test_logoutHandler_notImplemented(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(logoutHandler))
 	defer ts.Close()
@@ -113,7 +113,7 @@ func Test_logoutHandler_notImplemented(t *testing.T){
 	}
 }
 
-func Test_loginGetHandler(t *testing.T){
+func Test_loginGetHandler(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(loginGetHandler))
 	defer ts.Close()
 
@@ -133,7 +133,7 @@ func Test_loginGetHandler(t *testing.T){
 		return
 	}
 }
-func Test_loginPostHandler(t *testing.T){
+func Test_loginPostHandler(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(loginPostHandler))
 	defer ts.Close()
 
@@ -153,7 +153,7 @@ func Test_loginPostHandler(t *testing.T){
 		return
 	}
 }
-func Test_signupGetHandler(t *testing.T){
+func Test_signupGetHandler(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(signupGetHandler))
 	defer ts.Close()
 
@@ -173,7 +173,7 @@ func Test_signupGetHandler(t *testing.T){
 		return
 	}
 }
-func Test_signupPostHandler(t *testing.T){
+func Test_signupPostHandler(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(signupPostHandler))
 	defer ts.Close()
 
@@ -193,7 +193,7 @@ func Test_signupPostHandler(t *testing.T){
 		return
 	}
 }
-func Test_steganoGetHandler(t *testing.T){
+func Test_steganoGetHandler(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(steganoGetHandler))
 	defer ts.Close()
 
@@ -213,7 +213,7 @@ func Test_steganoGetHandler(t *testing.T){
 		return
 	}
 }
-func Test_steganoPostHandler(t *testing.T){
+func Test_steganoPostHandler(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(steganoPostHandler))
 	defer ts.Close()
 
@@ -233,7 +233,7 @@ func Test_steganoPostHandler(t *testing.T){
 		return
 	}
 }
-func Test_caesarGetHandler(t *testing.T){
+func Test_caesarGetHandler(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(caesarGetHandler))
 	defer ts.Close()
 
@@ -253,7 +253,7 @@ func Test_caesarGetHandler(t *testing.T){
 		return
 	}
 }
-func Test_caesarPostHandler(t *testing.T){
+func Test_caesarPostHandler(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(caesarPostHandler))
 	defer ts.Close()
 
@@ -273,7 +273,7 @@ func Test_caesarPostHandler(t *testing.T){
 		return
 	}
 }
-func Test_deleteImgPostHandler(t *testing.T){
+func Test_deleteImgPostHandler(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(deleteImgPostHandler))
 	defer ts.Close()
 

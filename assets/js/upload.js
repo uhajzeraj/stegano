@@ -16,7 +16,7 @@ function selectImage(e) {
 
 $(document).ready(function () {
 
-  var maxsize = 5000 * 1024; // 500 KB
+  var maxsize = 5000 * 1024;
 
   $('#max-size').html((maxsize/1024).toFixed(2));
 

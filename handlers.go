@@ -432,6 +432,11 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if shiftSize < 0 || shiftSize > 25 {
+		fmt.Println("Shift size not right")
+		return
+	}
+
 	ciphertext := encodeCaesar(plaintext, shiftSize)
 
 	fmt.Fprint(w, ciphertext)

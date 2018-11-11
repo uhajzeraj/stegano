@@ -6,6 +6,8 @@ $(document).ready(function() {
         var formData = new FormData();
         var plaintext = $(`textarea#plaintext`).val();
         formData.append('plaintext', plaintext);
+        var shiftSize = $(`#shiftSize`).val();
+        formData.append('shiftSize', shiftSize);
 
         $('#loading').show();
 

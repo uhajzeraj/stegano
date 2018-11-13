@@ -106,7 +106,7 @@ func TestMongo_Upsert(t *testing.T) {
 	defer session.Close()
 
 	var resultUser Users
-	upsertInfo, err := session.DB(db.DatabaseName).C(db.CollectionName).Upsert(user, user)
+	upsertInfo, err := session.DB("stegano").C("users").Upsert(user, user)
 
 	if err != nil {
 		fmt.Printf("error in FindId(): %v", err.Error())
@@ -121,15 +121,15 @@ func TestMongo_Upsert(t *testing.T) {
 		return
 	}
 
-	// coll := conn.DB("stegano").C("users")
-	// count, err := coll.Find(bson.M{"users": "Etnik"}).Count()
-	// if err != nil {
-	// 	t.Errorf("Error: %s", err)
-	// }
+	coll := conn.DB("stegano").C("users")
+	count, err := coll.Find(bson.M{"users": "Etnik"}).Count()
+	if err != nil {
+		t.Errorf("Error: %s", err)
+	}
 
-	// if count != 1 {
-	// 	t.Error("adding new user failed.")
-	// }
+	if count != 1 {
+		t.Error("adding new user failed.")
+	}
 }
 
 // Testing the Insert and FindId statements
@@ -184,4 +184,5 @@ func Test_existsDB(t *testing.T) {
 	}
 
 }
+
 

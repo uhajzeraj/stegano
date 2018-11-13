@@ -27,6 +27,30 @@ func Test_rootHandler_notImplemented(t *testing.T) {
 		return
 	}
 }
+
+func Test_rootHandler_malformedUrl(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(rootHandler))
+	defer ts.Close()
+
+	testCases := []string{
+		ts.URL,
+		ts.URL + "/project/hi/etc",
+		ts.URL + "/proj/",
+	}
+	for _, tstring := range testCases {
+		resp, err := http.Get(tstring)
+		if err != nil {
+			t.Errorf("Error making the GET request, %s", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			t.Errorf("For route: %s, expected StatusCode %d, received %d", tstring,
+				http.StatusOK, resp.StatusCode)
+			return
+		}
+	}
+
+}
 func Test_homeHandler_notImplemented(t *testing.T) {
 	// instantiate mock HTTP server (just for the purpose of testing
 	ts := httptest.NewServer(http.HandlerFunc(homeHandler))
@@ -47,6 +71,30 @@ func Test_homeHandler_notImplemented(t *testing.T) {
 		t.Errorf("Expected SatusSeeOther %d, received %d. ", 303, resp.StatusCode)
 		return
 	}
+}
+
+func Test_homeHandler_malformedUrl(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(homeHandler))
+	defer ts.Close()
+
+	testCases := []string{
+		ts.URL,
+		ts.URL + "/home",
+		ts.URL + "/hom",
+	}
+	for _, tstring := range testCases {
+		resp, _ := http.Get(tstring)
+		// if err != nil {
+		// 	t.Errorf("Error making the GET request, %s", err)
+		// }
+
+		if resp.StatusCode != http.StatusSeeOther {
+			t.Errorf("For route: %s, expected StatusCode %d, received %d", tstring,
+				http.StatusSeeOther, resp.StatusCode)
+			return
+		}
+	}
+
 }
 
 func Test_userHandler_notImplemented(t *testing.T) {

@@ -341,3 +341,63 @@ func Test_deleteImgPostHandler(t *testing.T) {
 		return
 	}
 }
+func Test_adminDeleteHandler(t *testing.T) {
+	// instantiate mock HTTP server (just for the purpose of testing
+	ts := httptest.NewServer(http.HandlerFunc(adminDeleteHandler))
+	defer ts.Close()
+
+	//create a request to our mock HTTP server
+	client := &http.Client{}
+
+	req, err := http.NewRequest(http.MethodDelete, ts.URL, nil)
+	if err != nil {
+		t.Errorf("Error constructing the DELETE request, %s", err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Errorf("Error executing the DELETE request, %s", err)
+	}
+
+	//check if the response from the handler is what we except
+	if resp.StatusCode != 400 {
+		t.Errorf("Expected %d, received %d. ", 400, resp.StatusCode)
+		return
+	}
+
+	req, err = http.NewRequest(http.MethodGet, ts.URL, nil)
+	if err != nil {
+		t.Errorf("Error constructing the GET request, %s", err)
+	}
+
+	resp, err = client.Do(req)
+	if err != nil {
+		t.Errorf("Error executing the GET request, %s", err)
+	}
+
+}
+
+func Test_adminHandler(t *testing.T) {
+	// instantiate mock HTTP server (just for the purpose of testing
+	ts := httptest.NewServer(http.HandlerFunc(adminHandler))
+	defer ts.Close()
+
+	//create a request to our mock HTTP server
+	client := &http.Client{}
+
+	req, err := http.NewRequest(http.MethodPost, ts.URL, nil)
+	if err != nil {
+		t.Errorf("Error constructing the POST request, %s", err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Errorf("Error executing the POST request, %s", err)
+	}
+
+	//check if the response from the handler is what we except
+	if resp.StatusCode != 400 {
+		t.Errorf("Expected  %d, received %d. ", 400, resp.StatusCode)
+		return
+	}
+}

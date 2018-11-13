@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+
+	"github.com/globalsign/mgo/bson"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -55,6 +58,9 @@ func newRouter() *mux.Router {
 	router.HandleFunc("/caesar", caesarPostHandler).Methods("POST")
 
 	router.HandleFunc("/deleteImg", deleteImgPostHandler).Methods("POST")
+	router.HandleFunc("/admin", adminHandler).Methods("POST")
+	router.HandleFunc("/admin/{user}", adminDeleteHandler).Methods("DELETE")
+
 
 	// Static file directory
 	staticFileDirectory := http.Dir("./assets/")
@@ -415,4 +421,70 @@ func deleteImgPostHandler(w http.ResponseWriter, r *http.Request) {
 	returnEmptyError(err)
 
 	fmt.Fprint(w, 1)
+}
+
+
+func adminDeleteHandler(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	pathVars := mux.Vars(r)
+
+	if len(pathVars) != 1 {
+		http.Error(w, "400 - Bad Request, too many URL arguments.", http.StatusBadRequest)
+		return
+	}
+
+	err := conn.DB("stegano").C("user").Remove(bson.M{"user": pathVars["user"]})
+
+	if err != nil {
+		http.Error(w, "404 - User not found!", 404)
+		return
+	}
+
+	resp := "{\n"
+	resp += `"user":\n`
+	resp += pathVars["user"]
+	resp += "\n}"
+
+	fmt.Fprint(w, resp)
+}
+
+func adminHandler(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	adminUser := &UserInfo{}
+
+	err := json.NewDecoder(r.Body).Decode(&adminUser)
+
+	if err != nil {
+		http.Error(w, err.Error(), 400) //checking for errors in the process and returning bad request if so
+		return
+	}
+
+	errorSlice := validateLogin(adminUser.User, adminUser.HashPass)
+
+	if len(errorSlice) > 0 {
+		for _, val := range errorSlice {
+			fmt.Println(val)
+		}
+		return
+	}
+	iter := conn.DB("stegano").C("user").Find(nil).Iter()
+
+	resp := "{\n"
+	resp += `"user":[\n`
+	for iter.Next(&adminUser) {
+		resp += adminUser.User
+		resp += ","
+	}
+	if err := iter.Close(); err != nil {
+		return
+	}
+	resp = strings.TrimRight(resp, ",")
+	resp += "]\n}"
+
+	fmt.Fprint(w, resp)
+
 }

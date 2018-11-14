@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	conn, _ = mgo.Dial("mongodb://admin:connecttome123@ds151533.mlab.com:51533/stegano")
+	conn, conErr = mgo.Dial("mongodb://admin:connecttome123@ds151533.mlab.com:51533/stegano")
 )
 
 // Images struct for storing fetched images

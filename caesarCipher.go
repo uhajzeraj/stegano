@@ -62,5 +62,4 @@ func encoding(char *rune, shift rune, offset rune) rune {
 // encode and decode provide the API for encoding and decoding text using
 // the Caesar Cipher algorithm.
 func encodeCaesar(text string, shiftSize int) string { return cipher(text, +1, shiftSize) }
-//func decodeCaesar(text string, shiftSize int) string { return cipher(text, -1, shiftSize) }
-
+func decodeCaesar(text string, shiftSize int) string { return cipher(text, -1, shiftSize) }

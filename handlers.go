@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -270,6 +271,9 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 		for _, val := range errorSlice {
 			fmt.Println(val)
 		}
+		response, err := json.Marshal(errorSlice)
+		returnEmptyError(err)
+		fmt.Fprint(w, string(response))
 		return
 	}
 
@@ -390,7 +394,6 @@ func steganoDecodeHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, message)
 }
-
 
 /* CAESAR's CIPHER */
 func caesarGetHandler(w http.ResponseWriter, r *http.Request) {

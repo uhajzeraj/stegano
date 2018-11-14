@@ -24,15 +24,19 @@ $(document).ready(function() {
         });
     });
 
-    // MAKE THE IMAGE BIGGER WHEN CLICKED
-    // $('img').hover(makeBigger, returnToOriginalSize);
+    //Change the modal image dynamically
+    $("img").click(function(event) {
 
-    // function makeBigger() {
-    //     $(this).css({height: '+=10%', width: '+=10%'});
-    // }
 
-    // function returnToOriginalSize() {
-    //     $(this).css({height: "", width: ""});
-    // }
+        var image = $(event.target).attr("src");
+        $("#imageModal").find("img").attr("src", image);
+
+    });
+
+    // Make the image bigger on hover
+    $('img').hover(function() {
+        $(this).toggleClass("hovered");
+    });
+
 
 });

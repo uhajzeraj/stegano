@@ -1,0 +1,39 @@
+label#fileUpload{
+    background-color: #007bff; 
+    border-color: #007bff;
+    padding: 10px;
+    color: #fff;
+    transition: .2s;
+    border-radius: 5px;
+}
+
+label#fileUpload:hover {
+    cursor: pointer;
+    background-color: #0069d9;
+    border-color: #0062cc;
+
+}
+
+input[type="file"] {
+    display: none;
+}
+
+
+#imageModal .modal-dialog {
+    max-width: 40%;
+}
+
+#imageModal img {
+    width: 100%;
+}
+
+.dynamicImg {
+    width: 100px;
+    height: 100px;
+    transition: .3s;
+}
+
+.hovered {
+    width: 200px;
+    height: 200px;
+}

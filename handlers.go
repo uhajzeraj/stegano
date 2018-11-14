@@ -218,6 +218,9 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 		for _, val := range errorSlice {
 			fmt.Println(val)
 		}
+		response, err := json.Marshal(errorSlice)
+		returnEmptyError(err)
+		fmt.Fprint(w, string(response))
 		return
 	}
 

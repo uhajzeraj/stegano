@@ -25,10 +25,26 @@ $(document).ready(function() {
                 
                 if(data == 1) {
                     window.location.replace("home");
+                } else { // We got some errors
+
+                    $("#danger-row").fadeIn("fast");
+                    var output = "";
+                    var jsonData = JSON.parse(data);
+
+                    for(var i = 0; i < jsonData.length; i++) {
+                      output += jsonData[i] + "<br/>";
+                    }
+                    $("#danger-info").html(output);
                 }
+
             }
         });
           
     });
+
+    // Danger alert close button won't work, close it by this
+  $('button.close').click(function() {
+    $("#danger-row").fadeOut("fast");
+  });
 
 });

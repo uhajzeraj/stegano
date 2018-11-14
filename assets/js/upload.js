@@ -3,14 +3,12 @@
 function noPreview() {
   $('#image-preview-div').css("display", "none");
   $('#preview-img').attr('src', 'noimage');
-  $('upload-button').attr('disabled', '');
+  $('#upload-button').attr('disabled', '');
 }
 
 function selectImage(e) {
-  $('#file').css("color", "green");
   $('#image-preview-div').css("display", "block");
   $('#preview-img').attr('src', e.target.result);
-  $('#preview-img').css('max-width', '550px');
 }
 
 
@@ -40,12 +38,10 @@ $(document).ready(function () {
             processData: false,
             contentType: false,
             success: function(data) {
-              
                 if(data == 1) {
                   $('#loading').hide();
                   window.location.replace("saved");
                 }
-
             }
         });
 

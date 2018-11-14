@@ -71,15 +71,15 @@
 
                 <form id="upload-image-form" action="/submit" method="post" enctype="multipart/form-data" name="enc">
                     <div style="width: 50%;float: left;">
-                        <div id="image-preview-div" style="width: 50%;">
+                        <div class="form-group">
                             <label for="exampleInputFile" style="font-weight: bold;">Selected image:</label>
                             <br>
-                            <!-- <img id="preview-img" src="noimage"> -->
-                        </div>
-                        <div class="form-group">
                             <label id="fileUpload">Enter your file
                                 <input type="file" name="file" id="file" required>
                             </label>
+                        </div>
+                        <div id="image-preview-div" style="display: none">
+                            <img id="preview-img" src="noimage">
                         </div>
                         <div>
                             <br><br><br>

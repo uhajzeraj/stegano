@@ -341,6 +341,8 @@ func Test_deleteImgPostHandler(t *testing.T) {
 		return
 	}
 }
+
+/*
 func Test_adminDeleteHandler(t *testing.T) {
 	// instantiate mock HTTP server (just for the purpose of testing
 	ts := httptest.NewServer(http.HandlerFunc(adminDeleteHandler))
@@ -375,7 +377,7 @@ func Test_adminDeleteHandler(t *testing.T) {
 		t.Errorf("Error executing the GET request, %s", err)
 	}
 
-}
+}*/
 
 func Test_adminHandler(t *testing.T) {
 	// instantiate mock HTTP server (just for the purpose of testing

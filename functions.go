@@ -8,6 +8,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var plainText = "helloooo"
+var cipherTxt = encodeCaesar(plainText, 3)
+
 // UserInfo structure to hold the fetched user hashed pass
 type UserInfo struct {
 	User     string `bson:"user"`

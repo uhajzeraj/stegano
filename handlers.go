@@ -64,6 +64,7 @@ func newRouter() *mux.Router {
 
 	router.HandleFunc("/caesar", caesarGetHandler).Methods("GET")
 	router.HandleFunc("/caesar", caesarPostHandler).Methods("POST")
+	router.HandleFunc("/caesarDecode", caesarDecodeHandler).Methods("POST")
 
 	router.HandleFunc("/rot13", rot13GetHandler).Methods("GET")
 	router.HandleFunc("/rot13", rot13PostHandler).Methods("POST")
@@ -462,6 +463,34 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 	ciphertext := encodeCaesar(plaintext, shiftSize)
 
 	fmt.Fprint(w, ciphertext)
+
+}
+
+func caesarDecodeHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Check if session is set
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to root
+		return
+	}
+
+	// Check if textfield is empty
+	if len(r.FormValue("ciphertext")) == 0 {
+		fmt.Println("Empty text field")
+		return
+	}
+
+	ciphertext := r.FormValue("ciphertext") // Get the text received
+	shiftSize, err := strconv.Atoi(r.FormValue("shiftSizeD"))
+	if err != nil {
+		return
+	}
+
+	plaintext := decodeCaesar(ciphertext, shiftSize)
+
+	fmt.Fprint(w, plaintext)
 
 }
 

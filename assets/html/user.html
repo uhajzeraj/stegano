@@ -17,6 +17,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="assets/js/user.js"></script>
 
 <style>
 	body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
@@ -78,24 +79,38 @@
             <hr/>
             <h3>General Info</h3>
             <br>
-            Username: <span id="username"></span>
+            Username: <span id="username"><b>{{.User}}</b></span>
             <br><br>
-            Firstname: <span id="username"></span>
-            <br><br>
-            Lastname: <span id="username"></span>
-            <br><br>
-            Email Address: <span id="username"></span>
+            Email Address: <span id="username"><b>{{.Email}}</b></span>
             <hr/>
         </div>
         
         <!-- Change password -->
-        <div class="container-fluid">
+        <div class="container-fluid" id="passFields">
             <h3>Change Current Password</h3>
             <br>
-            <input type="email" name="email" id="email" class="form-control input-lg" placeholder="Send password change form in this email..." >
+            <input type="password" name="currentPass" id="currentPass" class="form-control input-lg" placeholder="Current Password" >
+            <br>
+            <input type="password" name="newPass" id="newPass" class="form-control input-lg" placeholder="New Password" >
+            <br>
+            <input type="password" name="confirmPass" id="confirmPass" class="form-control input-lg" placeholder="Confrim Password" >
             <br>
             <input type="submit" value="Change Password" id="changePass" class="btn btn-primary btn-block btn-lg" style="width:18%;margin-left:20px;">
             <br>
+            <div id="danger-row" style="display: none;">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div id="danger-info">Blablabla content</div>
+                    <button type="button" class="close" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="display:none;">
+                <div id="danger-info">Password successfully changed</div>
+                <button type="button" class="close" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             <hr/>
         </div>
         
@@ -134,8 +149,6 @@
 
 <!-- END PAGE CONTENT -->
 </div>
-
-<script src="../js/user.js"></script>
 
 </body>
 </html>

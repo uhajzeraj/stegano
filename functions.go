@@ -126,3 +126,48 @@ func validateLogin(user, pass string) []string {
 
 	return errorSlice
 }
+
+func validateChangePassword(current, new, confirm, user string) []string {
+	var errorSlice []string
+
+	// Check if password is OK
+	match, err := regexp.MatchString(`^.{6,40}$`, current)
+	returnEmptyError(err)
+	if !match {
+		errorSlice = append(errorSlice, "Old Password does not meet the requirements")
+	}
+
+	// Check if newPassword is OK
+	match, err = regexp.MatchString(`^.{6,40}$`, new)
+	returnEmptyError(err)
+	if !match {
+		errorSlice = append(errorSlice, "New password does not meet the requirements")
+	}
+
+	// Check if confrimPassword is OK
+	match, err = regexp.MatchString(`^.{6,40}$`, confirm)
+	returnEmptyError(err)
+	if !match {
+		errorSlice = append(errorSlice, "Confirmation password does not meet the requirements")
+	}
+
+	// Check if passwords are the same
+	if new != confirm {
+		errorSlice = append(errorSlice, "Passwords do not match")
+	}
+
+	// Continue further if there are no errors
+	if len(errorSlice) == 0 {
+
+		result := UserInfo{}
+
+		conn.DB("stegano").C("users").Find(bson.M{"user": user}).Select(bson.M{"user": user, "passHash": 1}).One(&result)
+
+		err := bcrypt.CompareHashAndPassword([]byte(result.HashPass), []byte(current))
+		if err != nil {
+			errorSlice = append(errorSlice, "Old password is not correct")
+		}
+	}
+
+	return errorSlice
+}

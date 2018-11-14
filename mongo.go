@@ -103,3 +103,60 @@ func removeImage(user, imageName string) error {
 
 	return nil
 }
+
+func changeUserPassword(user, hashPass string) error {
+
+	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
+
+	// Change Password
+	err := coll.Update(
+		bson.M{"user": user},
+		bson.M{"$set": bson.M{"passHash": hashPass}},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func deleteUser(user string) error {
+
+	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
+
+	// Delete the user
+	err := coll.Remove(
+		bson.M{"user": user},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func findEmail(user string) (string, error) {
+
+	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
+
+	type Email struct {
+		Email string `bson:"email"`
+	}
+
+	var email Email
+
+	// Delete the user
+	err := coll.Find(
+		bson.M{"user": user},
+	).Select(
+		bson.M{"email": 1},
+	).One(&email)
+
+	if err != nil {
+		return "", err
+	}
+
+	return email.Email, nil
+
+}

@@ -31,6 +31,12 @@ type User struct {
 	User string `bson:"user"`
 }
 
+// UserTemplate structure for showing user info
+type UserTemplate struct {
+	User  string
+	Email string
+}
+
 //Session var
 var store = sessions.NewCookieStore(securecookie.GenerateRandomKey(32))
 
@@ -63,6 +69,9 @@ func newRouter() *mux.Router {
 	router.HandleFunc("/rot13", rot13PostHandler).Methods("POST")
 
 	router.HandleFunc("/deleteImg", deleteImgPostHandler).Methods("POST")
+
+	router.HandleFunc("/changePass", changePassPostHandler).Methods("POST")
+	router.HandleFunc("/deleteAcc", deleteAccDeleteHandler).Methods("DELETE")
 
 	// Static file directory
 	staticFileDirectory := http.Dir("./assets/")
@@ -120,7 +129,14 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	t.Execute(w, nil)
+
+	sessionUser := session.Values["user"].(string)
+	email, err := findEmail(sessionUser)
+	returnEmptyError(err)
+
+	tmpl := UserTemplate{sessionUser, email}
+
+	t.Execute(w, tmpl)
 }
 
 func savedHandler(w http.ResponseWriter, r *http.Request) {
@@ -517,4 +533,72 @@ func deleteImgPostHandler(w http.ResponseWriter, r *http.Request) {
 	returnEmptyError(err)
 
 	fmt.Fprint(w, 1)
+}
+
+func changePassPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	// Check if session is set
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to homepage
+		return
+	}
+
+	// Get the fields
+	currentPass := r.FormValue("currentPass")
+	newPass := r.FormValue("newPass")
+	confirmPass := r.FormValue("confirmPass")
+
+	sessionUser := session.Values["user"].(string)
+
+	// Validate the fields
+	errorSlice := validateChangePassword(currentPass, newPass, confirmPass, sessionUser)
+
+	// Check if there are any errors
+	if len(errorSlice) > 0 {
+		for _, val := range errorSlice {
+			fmt.Println(val)
+		}
+		response, err := json.Marshal(errorSlice)
+		returnEmptyError(err)
+		fmt.Fprint(w, string(response))
+		return
+	}
+
+	// Hash the password
+	hashPass, err := bcrypt.GenerateFromPassword([]byte(newPass), bcrypt.DefaultCost)
+	returnEmptyError(err)
+
+	// Change the password
+	err = changeUserPassword(sessionUser, string(hashPass))
+	returnEmptyError(err)
+
+	fmt.Fprint(w, 1)
+
+}
+
+func deleteAccDeleteHandler(w http.ResponseWriter, r *http.Request) {
+
+	session, err := store.Get(r, "user-login")
+	returnEmptyError(err)
+	// Check if session is set
+	if len(session.Values) == 0 {
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to homepage
+		return
+	}
+
+	// Get the fields
+	sessionUser := session.Values["user"].(string)
+
+	// Delete account
+	err = deleteUser(sessionUser)
+	returnEmptyError(err)
+
+	// Remove session
+	delete(session.Values, "user")
+	session.Save(r, w)
+
+	fmt.Fprint(w, 1)
+
 }

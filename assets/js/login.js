@@ -41,10 +41,10 @@ $(document).ready(function() {
         });
           
     });
-
+    
     // Danger alert close button won't work, close it by this
-  $('button.close').click(function() {
-    $("#danger-row").fadeOut("fast");
-  });
+    $('button.close').click(function() {
+        $("#danger-row").fadeOut("fast");
+    });
 
 });

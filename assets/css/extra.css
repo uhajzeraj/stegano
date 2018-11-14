@@ -37,3 +37,37 @@ input[type="file"] {
     width: 200px;
     height: 200px;
 }
+
+#content-wrapper {
+    margin: 0 auto;
+    width: 50%;
+    text-align: center;
+}
+
+#content-wrapper #preview-img {
+    width: 80%;
+}
+
+#chooseOption {
+    display: none;
+    margin-bottom: 30px;
+
+}
+
+#chooseOption button {
+    margin-left: 10px;
+}
+
+#content-wrapper #decode {
+    display: none;
+    margin-bottom: 50px;
+}
+
+#content-wrapper #encode {
+    display: none;
+}
+
+#newButton {
+    font-size: 18px;
+    margin-bottom: 15px;
+}

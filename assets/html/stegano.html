@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 
 <style>
 	body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
@@ -58,72 +58,36 @@
 <!-- Page Content -->
 <div class="w3-padding-large" id="main" style="margin-bottom:0px;">
 
-	<main style="padding: 5%;">
+        <div id="content-wrapper">
+            <h1>Steganography</h1>
+            <p>Steganography is the hiding of a secret message within an ordinary message and the extraction of it at its destination.</p>
+            <p>You can upload an image and write some text to hide it into the selected photo!</p>
     
-    	<h1>Steganography</h1>
-        <p>Steganography is the hiding of a secret message within an ordinary message and the extraction of it at its destination.</p>
-        <p>Our company is offering a service where you upload an image and write some text you want to hide into that photo!</p>
-        
-        <section style="margin-top:80px;">
+            <form id="upload-image-form" action="/submit" method="post" enctype="multipart/form-data" name="enc">
+                <label id="fileUpload">Select Image <i class="fas fa-list-ul"></i><input type="file" id="file" required></label>
+                <div id="image-preview-div" style="display: none">
+                    <img id="preview-img" src="#">
+                </div>
+                <div id="chooseOption">
+                    <h2>Choose an option</h2>
+                    <button class="btn btn-lg btn-info" id="encodeStegano">Encode image <i class="fas fa-lock"></i></button>
+                    <button class="btn btn-lg btn-dark" id="decodeStegano">Decode image <i class="fas fa-unlock"></i></button>
+                </div>
+                <div id="decode">
+                    <h3>Decoded message</h3>
+                    <textarea class="form-control" rows="5" id="decodedText" name="decodedText" readonly>{{.}}</textarea>
+                </div>
+                <div id="encode">
+                    <label for="comment" style="font-weight:bold;">Secret Message:</label>
+                    <textarea class="form-control" rows="5" id="text" name="text"></textarea>
+                    <br>
+                    <button class="btn btn-lg btn-info" id="upload-button" type="submit" >Encode image <i class="fas fa-lock"></i></button>
 
-
-            <div style="margin: auto;">
-
-                <form id="upload-image-form" action="/submit" method="post" enctype="multipart/form-data" name="enc">
-                    <div style="width: 50%;float: left;">
-                        <div class="form-group">
-                            <label for="exampleInputFile" style="font-weight: bold;">Selected image:</label>
-                            <br>
-                            <label id="fileUpload">Enter your file
-                                <input type="file" name="file" id="file" required>
-                            </label>
-                        </div>
-                        <div id="image-preview-div" style="display: none">
-                            <img id="preview-img" src="noimage">
-                        </div>
-                        <div>
-                            <br><br><br>
-                            <strong>If you want to decode an image that already has text hidden in it:</strong>
-                            <br><br>
-                            <button class="btn btn-lg btn-info" id="decryptStegano" type="submit" >Decrypt image</button>
-                        </div>
-                    </div>
-                    <div style="width: 50%;float: right;">
-                        <div id="encoding">
-                            <label for="comment" style="font-weight:bold;">Plaintext:</label>
-                            <textarea class="form-control" rows="5" id="text" name="text"></textarea>
-                            <br>
-                            <button class="btn btn-lg btn-primary" id="upload-button" type="submit" >Encrypt image</button>
-
-                            <br><br>
-                            <div class="alert alert-info" id="loading" style="display: none;" role="alert">
-                                Encoding image...
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="message"></div>
-                        </div>
-
-                        <div id="decoding" style="display: none;">
-                            <div>
-                                <label for="comment" style="font-weight:bold;">Decoded text:</label>
-                                <textarea class="form-control" rows="5" id="decodedText" name="decodedText" readonly>{{.}}</textarea>
-                            </div>
-                            <br>
-                            <button class="btn btn-lg btn-warning" id="returnToEncryption" type="submit" >Return to encoding</button>
-                        </div>
-                    </div>
-                </form>
-
-
-            </div>
-        
-        
-        </section>
-
-    </main>
+                    <br><br>
+                </div>
+                <div id="message"></div>
+            </form>
+        </div>
 
 <!-- END PAGE CONTENT -->
 </div>

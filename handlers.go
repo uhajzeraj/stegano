@@ -93,7 +93,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("assets/html/index.html")
 	if err != nil {
-		panic(err)
+		return
 	}
 	t.Execute(w, nil)
 }
@@ -110,7 +110,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("assets/html/home.html")
 	if err != nil {
-		panic(err)
+		return
 	}
 	t.Execute(w, nil)
 }
@@ -127,7 +127,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("assets/html/user.html")
 	if err != nil {
-		panic(err)
+		return
 	}
 
 	sessionUser := session.Values["user"].(string)
@@ -176,7 +176,7 @@ func savedHandler(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("assets/html/savedData.html")
 	if err != nil {
-		panic(err)
+		return
 	}
 	t.Execute(w, savedImages)
 }
@@ -210,7 +210,7 @@ func loginGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("assets/html/login.html")
 	if err != nil {
-		panic(err)
+		return
 	}
 	t.Execute(w, nil)
 }
@@ -231,9 +231,6 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 	errorSlice := validateLogin(user, pass)
 
 	if len(errorSlice) > 0 {
-		for _, val := range errorSlice {
-			fmt.Println(val)
-		}
 		response, err := json.Marshal(errorSlice)
 		returnEmptyError(err)
 		fmt.Fprint(w, string(response))
@@ -261,7 +258,7 @@ func signupGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("assets/html/signup.html")
 	if err != nil {
-		panic(err)
+		return
 	}
 	t.Execute(w, nil)
 }
@@ -287,9 +284,6 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if there are any errors
 	if len(errorSlice) > 0 {
-		for _, val := range errorSlice {
-			fmt.Println(val)
-		}
 		response, err := json.Marshal(errorSlice)
 		returnEmptyError(err)
 		fmt.Fprint(w, string(response))
@@ -325,7 +319,7 @@ func steganoGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("assets/html/stegano.html")
 	if err != nil {
-		panic(err)
+		return
 	}
 	t.Execute(w, nil)
 }
@@ -340,15 +334,25 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var errorSlice []string
+
 	// Check if textfield is empty
 	if len(r.FormValue("text")) == 0 {
-		fmt.Println("Empty text field")
-		return
+		errorSlice = append(errorSlice, "Empty text field")
 	}
 
 	// Check if image is uploaded successfully
 	file, fileHeader, err := r.FormFile("image")
 	if err != nil {
+		errorSlice = append(errorSlice, "Empty image")
+	}
+
+	// If there are any errors, don't continue any further
+	// Return to the user the errors
+	if len(errorSlice) > 0 {
+		response, err := json.Marshal(errorSlice)
+		returnEmptyError(err)
+		fmt.Fprint(w, string(response))
 		return
 	}
 
@@ -391,8 +395,14 @@ func steganoDecodeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if image is uploaded successfully
-	file, _, err := r.FormFile("image")
+	file, fileHeader, err := r.FormFile("image")
 	if err != nil {
+		return
+	}
+
+	fileExtension := strings.Split(fileHeader.Filename, ".")
+
+	if fileExtension[len(fileExtension)-1] != "png" {
 		return
 	}
 
@@ -427,7 +437,7 @@ func caesarGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("assets/html/caesar.html")
 	if err != nil {
-		panic(err)
+		return
 	}
 	t.Execute(w, nil)
 }
@@ -444,7 +454,6 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if textfield is empty
 	if len(r.FormValue("plaintext")) == 0 {
-		fmt.Println("Empty text field")
 		return
 	}
 
@@ -455,7 +464,6 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if shiftSize < 0 || shiftSize > 25 {
-		fmt.Println("Shift size not right")
 		return
 	}
 
@@ -478,7 +486,7 @@ func rot13GetHandler(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("assets/html/rot13.html")
 	if err != nil {
-		panic(err)
+		return
 	}
 	t.Execute(w, nil)
 }
@@ -495,7 +503,6 @@ func rot13PostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if textfield is empty
 	if len(r.FormValue("plaintext")) == 0 {
-		fmt.Println("Empty text field")
 		return
 	}
 
@@ -557,9 +564,6 @@ func changePassPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if there are any errors
 	if len(errorSlice) > 0 {
-		for _, val := range errorSlice {
-			fmt.Println(val)
-		}
 		response, err := json.Marshal(errorSlice)
 		returnEmptyError(err)
 		fmt.Fprint(w, string(response))

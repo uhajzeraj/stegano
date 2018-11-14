@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"image"
 	"image/color"
 	_ "image/gif"
@@ -34,13 +33,9 @@ func encode(inputReader multipart.File, inputMessage string) ([]byte, error) {
 
 	var messageIndex = 0 // get the rows and columns of the image
 
-	fmt.Printf("The message is %d characters long\n", len(message))
-	fmt.Printf("The image can store %d characters\n", bounds.Size().X*bounds.Size().Y)
-
 	totalPixels := bounds.Size().X * bounds.Size().Y // Get the total number of pixels in the image
 
 	if totalPixels < len(message) {
-		// fmt.Println("The text is larger than what can be hidden in the image")
 		return nil, errors.New("The text is larger than what can be hidden in the image")
 	}
 

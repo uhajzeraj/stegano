@@ -10,14 +10,14 @@ func decoded(sessionUser string) error {
 
 	imgs, err := getImages(sessionUser)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	for _, val := range imgs {
 
 		img, _, err := image.Decode(bytes.NewReader(val.Img)) // decode the image
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		bounds := img.Bounds() // get the bounds of the image
@@ -64,7 +64,7 @@ func decode(imgBinary []byte) (string, error) {
 
 	img, _, err := image.Decode(bytes.NewReader(imgBinary)) // decode the image
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	bounds := img.Bounds() // get the bounds of the image

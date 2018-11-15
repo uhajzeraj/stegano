@@ -164,3 +164,27 @@ func returnEmptyError(err error) {
 		return
 	}
 }
+func findEmail(user string) (string, error) {
+
+	coll := conn.DB("stegano").C("users") // `users` collection, `stegano` database
+
+	type Email struct {
+		Email string `bson:"email"`
+	}
+
+	var email Email
+
+	// Delete the user
+	err := coll.Find(
+		bson.M{"user": user},
+	).Select(
+		bson.M{"email": 1},
+	).One(&email)
+
+	if err != nil {
+		return "", err
+	}
+
+	return email.Email, nil
+
+}

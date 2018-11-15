@@ -3,20 +3,24 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"regexp"
+	"strings"
+	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
-	"strings"
 )
 
 var (
 	conn, _ = mgo.Dial("mongodb://admin:connecttome123@ds151533.mlab.com:51533/stegano")
 )
 
+// UserInfo struct
 type UserInfo struct {
 	User     string `bson:"user"`
 	HashPass string `bson:"passHash"`
@@ -31,6 +35,15 @@ func main() {
 
 	fmt.Print("Admin")
 
+	srv := &http.Server{
+		Handler: context.ClearHandler(router),
+		Addr:    ":8080",
+		// Good practice: enforce timeouts for servers you create!
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
+	log.Fatal(srv.ListenAndServe())
 }
 
 func adminDeleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -51,10 +64,10 @@ func adminDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := "{\n"
-	resp += `"user":\n`
+	resp := `{`
+	resp += `"user":`
 	resp += pathVars["user"]
-	resp += "\n}"
+	resp += `}`
 
 	fmt.Fprint(w, resp)
 }
@@ -82,19 +95,19 @@ func adminHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	iter := conn.DB("stegano").C("user").Find(nil).Iter()
 
-	resp := "{\n"
-	resp += `"user":[\n`
+	resp := `{`
+	resp += `"user":[`
 	for iter.Next(&adminUser) {
 		resp += adminUser.User
-		resp += ","
+		resp += `,`
 	}
 	if err := iter.Close(); err != nil {
 		return
 	}
 	resp = strings.TrimRight(resp, ",")
-	resp += "]\n}"
+	resp += `]}`
 
-	fmt.Fprint(w,resp)
+	fmt.Fprint(w, resp)
 
 }
 

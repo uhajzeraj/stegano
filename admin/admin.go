@@ -32,6 +32,7 @@ func main() {
 
 	router.HandleFunc("/admin", adminHandler).Methods("POST")
 	router.HandleFunc("/admin/{user}", adminDeleteHandler).Methods("DELETE")
+	router.HandleFunc("/admin/email/{user}", adminEmailHandler).Methods("GET")
 
 	fmt.Print("Admin")
 
@@ -45,7 +46,20 @@ func main() {
 
 	log.Fatal(srv.ListenAndServe())
 }
+func adminEmailHandler(w http.ResponseWriter, r *http.Request) {
+	pathVars := mux.Vars(r)
 
+	if len(pathVars) != 1 {
+		http.Error(w, "400 - Bad Request, too many URL arguments.", http.StatusBadRequest)
+		return
+	}
+	email,err := findEmail(pathVars["user"])
+	if err!=nil{
+		http.Error(w,"",400)
+		return
+	}
+	send("Test!",email)
+}
 func adminDeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")

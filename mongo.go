@@ -160,3 +160,45 @@ func findEmail(user string) (string, error) {
 	return email.Email, nil
 
 }
+func storeFailedLogin(user string, timestamp time.Time) error {
+	coll := conn.DB("stegano").C("loginlog")
+	email, err := findEmail(user)
+	if err != nil {
+		return err
+	}
+
+	err = coll.Insert(bson.M{
+		"user":  user,
+		"email": email,
+		"time":  timestamp})
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func countLogins(user string) int {
+
+	type TimeStamp struct {
+		Time time.Time `bson:"time"`
+	}
+
+	var timeStamp TimeStamp
+
+	coll := conn.DB("stegano").C("loginlog")
+
+	Iter := coll.Find(
+		bson.M{"user": user},
+	).Select(
+		bson.M{"time": 1},
+	).Iter()
+
+	i := 0
+	for Iter.Next(&timeStamp) {
+		if time.Now().Sub(timeStamp.Time) < 10*time.Minute {
+			i++
+		}
+	}
+	return i
+}

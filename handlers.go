@@ -235,9 +235,9 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 		response, err := json.Marshal(errorSlice)
 		returnEmptyError(err)
 		fmt.Fprint(w, string(response))
-		storeFailedLogin(user,time.Now())
-		i:=countLogins(user)
-		if i % 3 == 0{
+		storeFailedLogin(user, time.Now())
+		i := countLogins(user)
+		if i%3 == 0 {
 			http.Redirect(w, r, "/admin/email/"+user+"", http.StatusSeeOther)
 		}
 		return

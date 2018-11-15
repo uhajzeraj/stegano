@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/context"
@@ -15,7 +16,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler: context.ClearHandler(r),
-		Addr:    ":8080",
+		Addr:    ":" + os.Getenv("PORT"),
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,

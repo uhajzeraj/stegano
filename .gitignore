@@ -1,6 +1,5 @@
 assets/images/*
 assets/text/
-stegano
 test/
 decode_test.go
 encode_test.go

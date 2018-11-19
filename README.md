@@ -116,12 +116,14 @@ We have implemented an admin system that would allow an admin to see all the cur
  ```
 {
     "users": [
-        "gresad",
-        "besnikkelmendi",
-        "Christian",
-        "uhajzeraj",
-        "neharj",
-        "Christian2"
+        "user1",
+        "user2",
+        "user3",
+        "user4",
+        "user5",
+        .
+        .
+        .
     ]
 }
 ```

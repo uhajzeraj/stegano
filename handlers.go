@@ -234,13 +234,17 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 	if len(errorSlice) > 0 {
 		response, err := json.Marshal(errorSlice)
 		returnEmptyError(err)
-		fmt.Fprint(w, string(response))
+		
 		storeFailedLogin(user, time.Now())
 		i := countLogins(user)
+		fmt.Println(i)
 		if i%3 == 0 {
-			http.Redirect(w, r, "/admin/email/"+user+"", http.StatusSeeOther)
+			http.Redirect(w, r, "10.212.138.222:8080/admin/email/"+user+"", http.StatusSeeOther)
+			return
 		}
+		fmt.Fprint(w, string(response))
 		return
+
 	}
 
 	// Set some session values.

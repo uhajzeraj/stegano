@@ -119,11 +119,9 @@ We have implemented an admin system that would allow an admin to see all the cur
         "user1",
         "user2",
         "user3",
-        "user4",
-        "user5",
-        .
-        .
-        .
+           .
+           .
+           .
     ]
 }
 ```

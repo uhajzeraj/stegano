@@ -68,7 +68,7 @@ func Test_validateLogin2(t *testing.T) {
 	}
 }
 func Test_validateChangePassword(t *testing.T) {
-	err := validateChangePassword("etnik123", "gashi123", "gashi123", "Etnik5")
+	err := validateChangePassword("gashi123", "gashi123", "gashi123", "Etnik5")
 	if err != nil {
 		t.Errorf("Error during Change Password, %s", err)
 	}

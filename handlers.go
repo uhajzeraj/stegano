@@ -239,7 +239,7 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 		i := countLogins(user)
 		fmt.Println(i)
 		if i%3 == 0 {
-			http.Redirect(w, r, "10.212.138.222:8080/admin/email/"+user+"", http.StatusSeeOther)
+			//http.Redirect(w, r, "10.212.138.222:8080/admin/email/"+user+"", http.StatusSeeOther)
 			return
 		}
 		fmt.Fprint(w, string(response))
@@ -267,9 +267,7 @@ func signupGetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	t, err := template.ParseFiles("assets/html/signup.html")
-	if err != nil {
-		return
-	}
+	returnEmptyError(err)
 	t.Execute(w, nil)
 }
 
@@ -328,9 +326,7 @@ func steganoGetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	t, err := template.ParseFiles("assets/html/stegano.html")
-	if err != nil {
-		return
-	}
+	returnEmptyError(err)
 	t.Execute(w, nil)
 }
 
@@ -374,22 +370,16 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 	text := r.FormValue("text") // Get the text received
 
 	err = file.Close() // Close the file
-	if err != nil {
-		return
-	}
+	returnEmptyError(err)
 
 	imgBin, err := encode(file, text)
-	if err != nil {
-		return
-	}
+	returnEmptyError(err)
 
 	sessionUser := session.Values["user"].(string)
 
 	// Store the image into DB
 	err = storeImage(sessionUser, fileName, imgBin)
-	if err != nil {
-		return
-	}
+	returnEmptyError(err)
 
 	fmt.Fprint(w, 1)
 }
@@ -406,9 +396,7 @@ func steganoDecodeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if image is uploaded successfully
 	file, fileHeader, err := r.FormFile("image")
-	if err != nil {
-		return
-	}
+	returnEmptyError(err)
 
 	fileExtension := strings.Split(fileHeader.Filename, ".")
 
@@ -418,23 +406,21 @@ func steganoDecodeHandler(w http.ResponseWriter, r *http.Request) {
 
 	buf := bytes.NewBuffer(nil)
 	_, err = io.Copy(buf, file)
-	if err != nil {
-		return
-	}
+	
+	returnEmptyError(err)
 
 	// Decode the message
 	message, err := decode(buf.Bytes())
 	returnEmptyError(err)
 
 	err = file.Close() // Close the file
-	if err != nil {
-		return
-	}
+	returnEmptyError(err)
 
 	fmt.Fprint(w, message)
 }
 
 /* CAESAR's CIPHER */
+//
 func caesarGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if session is set
@@ -446,9 +432,7 @@ func caesarGetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	t, err := template.ParseFiles("assets/html/caesar.html")
-	if err != nil {
-		return
-	}
+	returnEmptyError(err)
 	t.Execute(w, nil)
 }
 
@@ -469,9 +453,7 @@ func caesarPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	plaintext := r.FormValue("plaintext") // Get the text received
 	shiftSize, err := strconv.Atoi(r.FormValue("shiftSize"))
-	if err != nil {
-		return
-	}
+	returnEmptyError(err)
 
 	if shiftSize < 0 || shiftSize > 25 {
 		return
@@ -501,9 +483,7 @@ func caesarDecodeHandler(w http.ResponseWriter, r *http.Request) {
 
 	ciphertext := r.FormValue("ciphertext") // Get the text received
 	shiftSize, err := strconv.Atoi(r.FormValue("shiftSizeD"))
-	if err != nil {
-		return
-	}
+	returnEmptyError(err)
 
 	plaintext := decodeCaesar(ciphertext, shiftSize)
 
@@ -523,9 +503,7 @@ func rot13GetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	t, err := template.ParseFiles("assets/html/rot13.html")
-	if err != nil {
-		return
-	}
+	returnEmptyError(err)
 	t.Execute(w, nil)
 }
 

@@ -162,8 +162,8 @@ func savedHandler(w http.ResponseWriter, r *http.Request) {
 		savedImage := SavedData{}
 
 		// Decode the mesagge
-		message, err := decode(val.Img)
-		returnEmptyError(err)
+		message, err2 := decode(val.Img)
+		returnEmptyError(err2)
 
 		// Save new image here
 		err = ioutil.WriteFile("assets/images/"+val.Name+".png", val.Img, 0644)
@@ -234,12 +234,12 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 	if len(errorSlice) > 0 {
 		response, err := json.Marshal(errorSlice)
 		returnEmptyError(err)
-		
+
 		storeFailedLogin(user, time.Now())
 		i := countLogins(user)
 		fmt.Println(i)
 		if i%3 == 0 {
-			http.Redirect(w, r, "10.212.138.222:8080/admin/email/"+user+"", http.StatusSeeOther)
+			// http.Redirect(w, r, "10.212.138.222:8080/admin/email/"+user+"", http.StatusSeeOther)
 			return
 		}
 		fmt.Fprint(w, string(response))
@@ -294,8 +294,8 @@ func signupPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if there are any errors
 	if len(errorSlice) > 0 {
-		response, err := json.Marshal(errorSlice)
-		returnEmptyError(err)
+		response, err2 := json.Marshal(errorSlice)
+		returnEmptyError(err2)
 		fmt.Fprint(w, string(response))
 		return
 	}
@@ -360,8 +360,8 @@ func steganoPostHandler(w http.ResponseWriter, r *http.Request) {
 	// If there are any errors, don't continue any further
 	// Return to the user the errors
 	if len(errorSlice) > 0 {
-		response, err := json.Marshal(errorSlice)
-		returnEmptyError(err)
+		response, err2 := json.Marshal(errorSlice)
+		returnEmptyError(err2)
 		fmt.Fprint(w, string(response))
 		return
 	}
@@ -602,8 +602,8 @@ func changePassPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if there are any errors
 	if len(errorSlice) > 0 {
-		response, err := json.Marshal(errorSlice)
-		returnEmptyError(err)
+		response, err2 := json.Marshal(errorSlice)
+		returnEmptyError(err2)
 		fmt.Fprint(w, string(response))
 		return
 	}

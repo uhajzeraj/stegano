@@ -14,13 +14,6 @@ type UserInfo struct {
 	HashPass string `bson:"passHash"`
 }
 
-// Damn you gometalinter and your cyclomatic complexity
-func errorPanic(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 // Metalinter
 func returnEmptyError(err error) {
 	if err != nil {
@@ -50,8 +43,8 @@ func validateSignup(user, pass, passConfirm, email string) []string {
 		errorSlice = append(errorSlice, "Username does not meet the requirements")
 	} else {
 		// Check if username exists
-		exists, err := entryExists("user", user, "users")
-		returnEmptyError(err)
+		exists, err2 := entryExists("user", user, "users")
+		returnEmptyError(err2)
 		if exists {
 			errorSlice = append(errorSlice, "Username already exists")
 		}
@@ -64,8 +57,8 @@ func validateSignup(user, pass, passConfirm, email string) []string {
 		errorSlice = append(errorSlice, "Email does not meet the requirements")
 	} else {
 		// Check if email exists
-		exists, err := entryExists("email", email, "users")
-		returnEmptyError(err)
+		exists, err3 := entryExists("email", email, "users")
+		returnEmptyError(err3)
 		if exists {
 			errorSlice = append(errorSlice, "Email already exists")
 		}

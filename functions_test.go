@@ -25,7 +25,10 @@ func Test_decodeCaeser(t *testing.T) {
 }
 func Test_errorPanic(t *testing.T) {
 	var err error
-	errorPanic(err)
+	if err != nil {
+		panic(err)
+	}
+
 }
 func Test_exists(t *testing.T) {
 	boolValue, err := exists("./tmp/asdf.png")
@@ -68,7 +71,7 @@ func Test_validateLogin2(t *testing.T) {
 	}
 }
 func Test_validateChangePassword(t *testing.T) {
-	err := validateChangePassword("etnik123", "gashi123", "gashi123", "Etnik5")
+	err := validateChangePassword("urani123", "urani123", "urani123", "uhajzeraj")
 	if err != nil {
 		t.Errorf("Error during Change Password, %s", err)
 	}
@@ -96,37 +99,36 @@ func Test_cipherDecoding(t *testing.T) {
 
 func Test_encode(t *testing.T) {
 	_, err := ioutil.ReadFile("tmp/asdf.png")
-	errorPanic(err)
-	file, err := os.Open("tmp/asdf.png")
-	errorPanic(err)
-	_, er := encode(file, "hello")
-	if er != nil {
-		t.Error("Encode function doesn't work")
-	}
-}
-
-func Test_decoded(t *testing.T) {
-
-	err := decoded("uhajzeraj")
-
 	if err != nil {
-		t.Error(err)
+		panic(err)
+	}
+	file, err := os.Open("tmp/asdf.png")
+	if err != nil {
+		panic(err)
+	}
+	_, err = encode(file, "hello")
+	if err != nil {
+		t.Error("Encode function doesn't work")
 	}
 }
 
 func Test_decode(t *testing.T) {
 
 	_, err := ioutil.ReadFile("tmp/asdf.png")
-	errorPanic(err)
+	if err != nil {
+		panic(err)
+	}
 	file, err := os.Open("tmp/asdf.png")
-	errorPanic(err)
+	if err != nil {
+		panic(err)
+	}
 	bytes, er := encode(file, "hello")
 	if er != nil {
 		t.Error("Encode function doesn't work")
 	}
 
 	_, err = decode(bytes)
-	if er != nil {
+	if err != nil {
 		t.Error("Decode function doesn't work")
 	}
 }

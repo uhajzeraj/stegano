@@ -67,7 +67,7 @@ func Test_homeHandler_notImplemented(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error constructing the GET request, %s", err)
 	}
-	session, err := store.Get(req, "user-login")
+	session, _ := store.Get(req, "user-login")
 	session.Values["user"] = "uhajzeraj"
 
 	resp, _ := client.Do(req)
@@ -212,6 +212,7 @@ func Test_loginGetHandler(t *testing.T) {
 		return
 	}
 }
+
 func Test_loginPostHandler(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(loginPostHandler))
 	defer ts.Close()
@@ -232,6 +233,7 @@ func Test_loginPostHandler(t *testing.T) {
 		return
 	}
 }
+
 func Test_signupGetHandler(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(signupGetHandler))
 	defer ts.Close()

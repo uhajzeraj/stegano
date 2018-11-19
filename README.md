@@ -21,16 +21,9 @@ The main service we offer is Steganography. The other services offered are Caesa
   * Working together as a group, organizing the time correctly and the work between members of our group.
   
 
-### Members of our group and the total work hours dedicated to the project cumulatively by the group
-  
-  * Uran Hajzeraj (uhajzeraj)     - 22 hours
-  * Nehar Jashari (neharj)        - 18 hours
-  * Besnik Kelmendi (besnikk)     - 19 hours
-  * Gresa Dodaj (gresad)          - 18 hours
-  * Etnik Gashi (etnikg)          - 19 hours
-  
-  
-Total of 96 hours of work for the group.
+### Total work hours dedicated to the project cumulatively by the group
+
+Total of 96 hours of work.
 
 
 

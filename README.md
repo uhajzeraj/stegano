@@ -1,5 +1,4 @@
 # IMT2681 Assignment 3
-=======
 
 # Steganography Services and Other Classic Cryptographic Algorithms
 
@@ -24,15 +23,11 @@ The main service we offer is Steganography. The other services offered are Caesa
 
 ### Members of our group and the total work hours dedicated to the project cumulatively by the group
   
-  Uran Hajzeraj (uhajzeraj)     - 22 hours
-  
-  Nehar Jashari (neharj)        - 18 hours
-  
-  Besnik Kelmendi (besnikk)     - 19 hours
-  
-  Gresa Dodaj (gresad)          - 18 hours
-  
-  Etnik Gashi (etnikg)          - 19 hours
+  * Uran Hajzeraj (uhajzeraj)     - 22 hours
+  * Nehar Jashari (neharj)        - 18 hours
+  * Besnik Kelmendi (besnikk)     - 19 hours
+  * Gresa Dodaj (gresad)          - 18 hours
+  * Etnik Gashi (etnikg)          - 19 hours
   
   
 Total of 96 hours of work for the group.

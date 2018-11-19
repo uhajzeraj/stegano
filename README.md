@@ -103,7 +103,9 @@ You can change current password and you can delete your account.
 
 ![screenshot_4](https://user-images.githubusercontent.com/37405052/48714128-4cfcc300-ec12-11e8-84f5-81de121c45a0.png)
 
+## Admin system
 
+We implemented a admin system that would allow an admin to see all the current users and if needed to delete any of them. This part of the project has been deployed to OpenStack. Another part of the admin system is that it will make sure to notify users if suspicious activities happen while login in, for example if the user commits 3 rapid fail attempts of logins then the user will receive an email explaining what has been going on.
 
 
 ## Resources

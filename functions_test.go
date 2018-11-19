@@ -1,6 +1,8 @@
 package main
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -42,11 +44,26 @@ func Test_validateSignup(t *testing.T) {
 		t.Errorf("Error validating Signup:%s", err)
 	}
 }
+func Test_validateSignup2(t *testing.T) {
+
+	err := validateSignup("uhajzeraj", "etnik123", "etnik1s3", "besnikk@stud.ntnu.no")
+	if err == nil {
+		t.Errorf("Error validating Signup:%s", err)
+	}
+}
 
 func Test_validateLogin(t *testing.T) {
 
 	err := validateLogin("etnik5", "etnik123")
 	if err == nil {
+		t.Errorf("Error validating Login:%s", err)
+	}
+}
+
+func Test_validateLogin2(t *testing.T) {
+
+	err := validateLogin("uhajzeraj", "urani123")
+	if err != nil {
 		t.Errorf("Error validating Login:%s", err)
 	}
 }
@@ -75,4 +92,65 @@ func Test_cipherDecoding(t *testing.T) {
 	// if err != plainText {
 	// 	t.Error("Decoding not correct")
 	// }
+}
+
+func Test_encode(t *testing.T) {
+	_, err := ioutil.ReadFile("tmp/asdf.png")
+	errorPanic(err)
+	file, err := os.Open("tmp/asdf.png")
+	errorPanic(err)
+	_, er := encode(file, "hello")
+	if er != nil {
+		t.Error("Encode function doesn't work")
+	}
+}
+
+func Test_decoded(t *testing.T) {
+
+	err := decoded("uhajzeraj")
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func Test_decode(t *testing.T) {
+
+	_, err := ioutil.ReadFile("tmp/asdf.png")
+	errorPanic(err)
+	file, err := os.Open("tmp/asdf.png")
+	errorPanic(err)
+	bytes, er := encode(file, "hello")
+	if er != nil {
+		t.Error("Encode function doesn't work")
+	}
+
+	_, err = decode(bytes)
+	if er != nil {
+		t.Error("Decode function doesn't work")
+	}
+}
+
+func Test_rot13(t *testing.T) {
+	r := rot13(45)
+
+	if r == 0 {
+		t.Error("rot13 isn't working properly!")
+	}
+}
+
+func Test_encoding(t *testing.T) {
+	var j rune = 1
+	i := encoding(&j, 2, 3)
+	if i == 0 {
+		t.Error("Encoding isn't working properly!")
+	}
+}
+
+func Test_decoding(t *testing.T) {
+	var j rune = 1
+	i := decoding(&j, 2, 3)
+	if i == 0 {
+		t.Error("Encoding isn't working properly!")
+	}
 }

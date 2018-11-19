@@ -1,11 +1,11 @@
 package main
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"regexp"
+	// "regexp"
 	"strings"
 	"time"
 
@@ -13,7 +13,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
-	"golang.org/x/crypto/bcrypt"
+	// "golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -23,14 +23,13 @@ var (
 // UserInfo struct
 type UserInfo struct {
 	User     string `bson:"user"`
-	HashPass string `bson:"passHash"`
 }
 
 func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/admin", adminHandler).Methods("POST")
+	router.HandleFunc("/admin", adminHandler).Methods("GET")
 	router.HandleFunc("/admin/{user}", adminDeleteHandler).Methods("DELETE")
 	router.HandleFunc("/admin/email/{user}", adminEmailHandler).Methods("GET")
 
@@ -71,7 +70,7 @@ func adminDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := conn.DB("stegano").C("user").Remove(bson.M{"user": pathVars["user"]})
+	err := conn.DB("stegano").C("users").Remove(bson.M{"user": pathVars["user"]})
 
 	if err != nil {
 		http.Error(w, "404 - User not found!", 404)
@@ -92,27 +91,12 @@ func adminHandler(w http.ResponseWriter, r *http.Request) {
 
 	adminUser := &UserInfo{}
 
-	err := json.NewDecoder(r.Body).Decode(&adminUser)
-
-	if err != nil {
-		http.Error(w, err.Error(), 400) //checking for errors in the process and returning bad request if so
-		return
-	}
-
-	errorSlice := validateLogin(adminUser.User, adminUser.HashPass)
-
-	if len(errorSlice) > 0 {
-		for _, val := range errorSlice {
-			fmt.Println(val)
-		}
-		return
-	}
-	iter := conn.DB("stegano").C("user").Find(nil).Iter()
+	iter := conn.DB("stegano").C("users").Find(nil).Select(bson.M{"user": 1}).Iter()
 
 	resp := `{`
 	resp += `"user":[`
 	for iter.Next(&adminUser) {
-		resp += adminUser.User
+		resp += `"`+adminUser.User+`"`
 		resp += `,`
 	}
 	if err := iter.Close(); err != nil {
@@ -125,39 +109,39 @@ func adminHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func validateLogin(user, pass string) []string {
+// func validateLogin(user, pass string) []string {
 
-	var errorSlice []string
+// 	var errorSlice []string
 
-	// Check if username is OK
-	match, err := regexp.MatchString(`^[a-zA-Z0-9_-]{6,30}$`, user)
-	returnEmptyError(err)
-	if !match {
-		errorSlice = append(errorSlice, "Username does not meet the requirements")
-	}
+// 	// Check if username is OK
+// 	match, err := regexp.MatchString(`^[a-zA-Z0-9_-]{6,30}$`, user)
+// 	returnEmptyError(err)
+// 	if !match {
+// 		errorSlice = append(errorSlice, "Username does not meet the requirements")
+// 	}
 
-	// Check if password is OK
-	match, err = regexp.MatchString(`^.{6,40}$`, pass)
-	returnEmptyError(err)
-	if !match {
-		errorSlice = append(errorSlice, "Password does not meet the requirements")
-	}
+// 	// Check if password is OK
+// 	match, err = regexp.MatchString(`^.{6,40}$`, pass)
+// 	returnEmptyError(err)
+// 	if !match {
+// 		errorSlice = append(errorSlice, "Password does not meet the requirements")
+// 	}
 
-	// Continue further if there are no errors
-	if len(errorSlice) == 0 {
+// 	// Continue further if there are no errors
+// 	if len(errorSlice) == 0 {
 
-		result := UserInfo{}
+// 		result := UserInfo{}
 
-		conn.DB("stegano").C("admin").Find(bson.M{"user": user}).Select(bson.M{"user": user, "passHash": 1}).One(&result)
+// 		conn.DB("stegano").C("admin").Find(bson.M{"user": user}).Select(bson.M{"user": user, "passHash": 1}).One(&result)
 
-		err := bcrypt.CompareHashAndPassword([]byte(result.HashPass), []byte(pass))
-		if err != nil {
-			errorSlice = append(errorSlice, "Username or password is not correct")
-		}
-	}
+// 		err := bcrypt.CompareHashAndPassword([]byte(result.HashPass), []byte(pass))
+// 		if err != nil {
+// 			errorSlice = append(errorSlice, "Username or password is not correct")
+// 		}
+// 	}
 
-	return errorSlice
-}
+// 	return errorSlice
+// }
 
 func returnEmptyError(err error) {
 	if err != nil {

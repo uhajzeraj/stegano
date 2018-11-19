@@ -51,7 +51,11 @@ func Test_rootHandler_malformedUrl(t *testing.T) {
 	}
 
 }
+
+// var store = sessions.NewCookieStore(securecookie.GenerateRandomKey(32))
+
 func Test_homeHandler_notImplemented(t *testing.T) {
+
 	// instantiate mock HTTP server (just for the purpose of testing
 	ts := httptest.NewServer(http.HandlerFunc(homeHandler))
 	defer ts.Close()
@@ -63,6 +67,8 @@ func Test_homeHandler_notImplemented(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error constructing the GET request, %s", err)
 	}
+	session, err := store.Get(req, "user-login")
+	session.Values["user"] = "uhajzeraj"
 
 	resp, _ := client.Do(req)
 
@@ -159,7 +165,7 @@ func Test_savedHandler_notImplemeted(t *testing.T) {
 
 	//check if the response from the handler is what we except
 	if resp.StatusCode != 303 {
-		t.Errorf("Expected ...  %d, received %d. ", 303, resp.StatusCode)
+		t.Errorf("Expected StatusSeeOthers  %d, received %d. ", 303, resp.StatusCode)
 		return
 	}
 }

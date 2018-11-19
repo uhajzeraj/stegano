@@ -115,14 +115,7 @@ We have implemented an admin system that would allow an admin to see all the cur
  
  ```
 {
-    "users": [
-        "user1",
-        "user2",
-        "user3",
-           .
-           .
-           .
-    ]
+    "users": ["user1","user2","user3",...]
 }
 ```
 ##### DELETE /admin/`<user>`

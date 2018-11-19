@@ -237,7 +237,6 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 
 		storeFailedLogin(user, time.Now())
 		i := countLogins(user)
-		fmt.Println(i)
 		if i%3 == 0 {
 			// http.Redirect(w, r, "10.212.138.222:8080/admin/email/"+user+"", http.StatusSeeOther)
 			return
@@ -477,7 +476,6 @@ func caesarDecodeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if textfield is empty
 	if len(r.FormValue("ciphertext")) == 0 {
-		fmt.Println("Empty text field")
 		return
 	}
 

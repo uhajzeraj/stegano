@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
 	// "regexp"
 	"strings"
 	"time"
@@ -22,7 +23,7 @@ var (
 
 // UserInfo struct
 type UserInfo struct {
-	User     string `bson:"user"`
+	User string `bson:"user"`
 }
 
 func main() {
@@ -32,8 +33,6 @@ func main() {
 	router.HandleFunc("/admin", adminHandler).Methods("GET")
 	router.HandleFunc("/admin/{user}", adminDeleteHandler).Methods("DELETE")
 	router.HandleFunc("/admin/email/{user}", adminEmailHandler).Methods("GET")
-
-	fmt.Print("Admin")
 
 	srv := &http.Server{
 		Handler: context.ClearHandler(router),
@@ -52,12 +51,12 @@ func adminEmailHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "400 - Bad Request, too many URL arguments.", http.StatusBadRequest)
 		return
 	}
-	email,err := findEmail(pathVars["user"])
-	if err!=nil{
-		http.Error(w,"",400)
+	email, err := findEmail(pathVars["user"])
+	if err != nil {
+		http.Error(w, "", 400)
 		return
 	}
-	send("Test!",email)
+	send("Test!", email)
 }
 func adminDeleteHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -96,7 +95,7 @@ func adminHandler(w http.ResponseWriter, r *http.Request) {
 	resp := `{`
 	resp += `"user":[`
 	for iter.Next(&adminUser) {
-		resp += `"`+adminUser.User+`"`
+		resp += `"` + adminUser.User + `"`
 		resp += `,`
 	}
 	if err := iter.Close(); err != nil {

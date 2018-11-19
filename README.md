@@ -107,6 +107,36 @@ You can change current password and you can delete your account.
 
 We have implemented an admin system that would allow an admin to see all the current users and if needed to delete any of them. This part of the project has been deployed to OpenStack. Another part of the admin system is that it will make sure to notify users if suspicious activities happen while login in, for example if the user commits 3 rapid fail attempts of logins then the user will receive an email explaining what has been going on.
 
+##### GET /admin
+* Will give you the list of current users formated in json:
+* Response type: application/json
+* Response code: 200 if everything is OK, appropriate error code otherwise. 
+* Response: 
+ 
+ ```
+{
+    "users": [
+        "gresad",
+        "besnikkelmendi",
+        "Christian",
+        "uhajzeraj",
+        "neharj",
+        "Christian2"
+    ]
+}
+```
+##### DELETE /admin/`<user>`
+* Will delete the `<user>`
+* Response type: application/json
+* Response code: 200 if everything is OK, appropriate error code otherwise. 
+* Response: 
+
+```
+{
+    "user": <user>
+}
+```
+
 
 ## Resources
 

@@ -22,30 +22,30 @@ The main service we offer is Steganography. The other services offered are Caesa
   * Working together as a group, organizing the time correctly and the work between members of our group.
   
 
-## Members of our group and the total work hours dedicated to the project cumulatively by the group
+### Members of our group and the total work hours dedicated to the project cumulatively by the group
   
-  *Uran Hajzeraj (uhajzeraj)     - 22 hours
+  Uran Hajzeraj (uhajzeraj)     - 22 hours
   
-  *Nehar Jashari (neharj)        - 18 hours
+  Nehar Jashari (neharj)        - 18 hours
   
-  *Besnik Kelmendi (besnikk)     - 19 hours
+  Besnik Kelmendi (besnikk)     - 19 hours
   
-  *Gresa Dodaj (gresad)          - 18 hours
+  Gresa Dodaj (gresad)          - 18 hours
   
-  *Etnik Gashi (etnikg)          - 19 hours
+  Etnik Gashi (etnikg)          - 19 hours
   
   
 Total of 96 hours of work for the group.
 
 
 
-## Heroku deployment
+### Heroku deployment
 
 The app has been deployed in Heroku and has this link: https://imt2681-stegano.herokuapp.com/
 
 
 
-# Usage of the services
+## Using our application
 
 First you have to create an account so that the necessary information about the users are saved into our database. The passwords of the users are saved in our database using the most advanced hashing techniques **bcrypt**. **bcrypt** is a password hashing function designed by Niels Provos and David Mazières, based on the Blowfish cipher, and presented at USENIX in 1999. Besides incorporating a salt to protect against rainbow table attacks, bcrypt is an adaptive function: over time, the iteration count can be increased to make it slower, so it remains resistant to brute-force search attacks even with increasing computation power. Read more about it in [here](https://en.wikipedia.org/wiki/Bcrypt?fbclid=IwAR02_QdFVS8AgzDLpw4SsRgvqec-gww7aoj2t01bsfh1slKuNIf5LF0Oi2c).
 

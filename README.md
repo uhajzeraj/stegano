@@ -16,6 +16,7 @@ The main service we offer is Steganography. The other services offered are Caesa
   * OpenStack
   * MongoDB
 
+
 ### During our work in this project we learned a lot of new things: 
 
   * We learned how to better use Go language as a back-end programming language, implementing together with it all of the front-end components such as HTML, Javascript, CSS, Bootstrap & jQuery.
@@ -24,15 +25,17 @@ The main service we offer is Steganography. The other services offered are Caesa
   * Implementing new things in OpenStack, which are explained in more details later in this Readme.
   * Working together as a group, organizing the time correctly and the work between members of our group.
   
+
 ## Members of our group and the total work hours dedicated to the project cumulatively by the group
   
-  Uran Hajzeraj (uhajzeraj)     - 22 hours
-  Nehar Jashari (neharj)        - 18 hours
-  Besnik Kelmendi (besnikk)     - 19 hours
-  Gresa Dodaj (gresad)          - 18 hours
-  Etnik Gashi (etnikg)          - 19 hours
+  *Uran Hajzeraj (uhajzeraj)     - 22 hours
+  *Nehar Jashari (neharj)        - 18 hours
+  *Besnik Kelmendi (besnikk)     - 19 hours
+  *Gresa Dodaj (gresad)          - 18 hours
+  *Etnik Gashi (etnikg)          - 19 hours
   
 Total of 96 hours of work for the group.
+
 
 
 ## Heroku deployment
@@ -40,15 +43,16 @@ Total of 96 hours of work for the group.
 The app has been deployed in Heroku and has this link: https://imt2681-stegano.herokuapp.com/
 
 
+
 # Usage of the services
 
 First you have to create an account so that the necessary information about the users are saved into our database. The passwords of the users are saved in our database using the most advanced hashing techniques **bcrypt**. **bcrypt** is a password hashing function designed by Niels Provos and David Mazières, based on the Blowfish cipher, and presented at USENIX in 1999. Besides incorporating a salt to protect against rainbow table attacks, bcrypt is an adaptive function: over time, the iteration count can be increased to make it slower, so it remains resistant to brute-force search attacks even with increasing computation power. Read more about it in [here](https://en.wikipedia.org/wiki/Bcrypt?fbclid=IwAR02_QdFVS8AgzDLpw4SsRgvqec-gww7aoj2t01bsfh1slKuNIf5LF0Oi2c).
 
-Screenshot 1        -       Screenshot 2
-
 After creating an account you can access the services offered by us.
 
-  Screenshot 3
+![screenshot_3](https://user-images.githubusercontent.com/37405052/48714126-4cfcc300-ec12-11e8-9dc0-3075c2651e75.png)
+
+
 
 ## Steganography
 
@@ -59,16 +63,24 @@ You can read more about Stegaography in this link: <a href="https://en.wikipedia
 In our website you can enter the icon for steganography and follow these steps to use it:
 
 1. Select an image which you want to hide text to.
-  Screenshot 7
-  
+
+![screenshot_7](https://user-images.githubusercontent.com/37405052/48714133-4d955980-ec12-11e8-80ad-aacc6be41f4f.png)
+
+
 2. Choose an option. Do you want to encode text into that image or if you know there is text hidden with steganography you want to decode it.
-  Screenshot 8
+
+![screenshot_8](https://user-images.githubusercontent.com/37405052/48714134-4d955980-ec12-11e8-9d04-8fb6a2785623.png)
+  
   
 3. If you choose Encoding, then you can write any text you want in that image and that text will never be seen by the ordinary human eye. If you want to Decode that image then the hidden text will be shown to the user after pressing that button.
-  Screenshot 9
+
+![screenshot_9](https://user-images.githubusercontent.com/37405052/48714135-4e2df000-ec12-11e8-8ef1-e10f4860ca08.png)
+
   
 4. After encoding the image, that image will be saved in the particular user database along with his other information. The saved data will be accessible for the user in the Saved Data page in the website. You can download that image for further use or you can delete it.
-  Screenshot 10
+
+![screenshot_10](https://user-images.githubusercontent.com/37405052/48714136-4e2df000-ec12-11e8-8298-de42cfb011ba.png)
+
 
 
 ## Caesar's Cipher
@@ -79,8 +91,10 @@ The method is named after Julius Caesar, who used it in his private corresponden
 
 In our site you can encrypt text using the Caesar's Cipher, while choosing the shifting size for that or you can decrypt a text with this algorithm if you know the correct shifting size used for the ecryption.
 
-  Screenshot 5
-  
+![screenshot_5](https://user-images.githubusercontent.com/37405052/48714130-4d955980-ec12-11e8-91b8-11641b2aa944.png)
+
+
+
 ## ROT 13
 
 ROT13 ("rotate by 13 places", sometimes hyphenated ROT-13) is a simple letter substitution cipher that replaces a letter with the 13th letter after it, in the alphabet.
@@ -89,22 +103,30 @@ ROT13 is a special case of the Caesar cipher which was developed in ancient Rome
 
 In our site you can encrypt text using this algorithm with pressing the Encrypt text button shown in the webpage.
 
-  Screenshot 6
+![screenshot_6](https://user-images.githubusercontent.com/37405052/48714132-4d955980-ec12-11e8-9368-09fc8126305e.png)
+
+
 
 ## User page
 
 In this page you can see the information that is saved by us in our database and you can do other actions concerning your account.
 You can change current password and you can delete your account.
 
-  Screenshot 4
+![screenshot_4](https://user-images.githubusercontent.com/37405052/48714128-4cfcc300-ec12-11e8-84f5-81de121c45a0.png)
+
+
 
 
 # Resources
 
-[Official MongoDB driver](https://github.com/mongodb/mongo-go-driver)
+[Official MongoDB driver](https://github.com/mongodb/mongo-go-driver) 
+
 [MGO](https://github.com/globalsign/mgo)
+
 [bcrypt](https://godoc.org/golang.org/x/crypto/bcrypt)
+
 [Gorilla Mux](https://github.com/gorilla/mux)
+
 
 
 # Build with

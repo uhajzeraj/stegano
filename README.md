@@ -1,9 +1,5 @@
-Steganography
-=======
-
 # IMT2681 Assignment 3
-
-[![Build Status](https://travis-ci.org/uhajzeraj/stegano.svg?branch=master)](https://travis-ci.org/uhajzeraj/stegano)
+=======
 
 # Steganography Services and Other Classic Cryptographic Algorithms
 
@@ -29,10 +25,15 @@ The main service we offer is Steganography. The other services offered are Caesa
 ## Members of our group and the total work hours dedicated to the project cumulatively by the group
   
   *Uran Hajzeraj (uhajzeraj)     - 22 hours
+  
   *Nehar Jashari (neharj)        - 18 hours
+  
   *Besnik Kelmendi (besnikk)     - 19 hours
+  
   *Gresa Dodaj (gresad)          - 18 hours
+  
   *Etnik Gashi (etnikg)          - 19 hours
+  
   
 Total of 96 hours of work for the group.
 
@@ -64,17 +65,17 @@ In our website you can enter the icon for steganography and follow these steps t
 
 1. Select an image which you want to hide text to.
 
-![screenshot_7](https://user-images.githubusercontent.com/37405052/48714133-4d955980-ec12-11e8-80ad-aacc6be41f4f.png)
+![screenshot_11](https://user-images.githubusercontent.com/37405052/48714822-d82a8880-ec13-11e8-9090-8c164683a9f7.png)
 
 
 2. Choose an option. Do you want to encode text into that image or if you know there is text hidden with steganography you want to decode it.
 
-![screenshot_8](https://user-images.githubusercontent.com/37405052/48714134-4d955980-ec12-11e8-9d04-8fb6a2785623.png)
+![screenshot_12](https://user-images.githubusercontent.com/37405052/48714823-d82a8880-ec13-11e8-8f0d-fd6252a49f8c.png)
   
   
 3. If you choose Encoding, then you can write any text you want in that image and that text will never be seen by the ordinary human eye. If you want to Decode that image then the hidden text will be shown to the user after pressing that button.
 
-![screenshot_9](https://user-images.githubusercontent.com/37405052/48714135-4e2df000-ec12-11e8-8ef1-e10f4860ca08.png)
+![screenshot_14](https://user-images.githubusercontent.com/37405052/48714824-d82a8880-ec13-11e8-9eb5-e283636416ed.png)
 
   
 4. After encoding the image, that image will be saved in the particular user database along with his other information. The saved data will be accessible for the user in the Saved Data page in the website. You can download that image for further use or you can delete it.
@@ -117,7 +118,7 @@ You can change current password and you can delete your account.
 
 
 
-# Resources
+## Resources
 
 [Official MongoDB driver](https://github.com/mongodb/mongo-go-driver) 
 
@@ -129,7 +130,7 @@ You can change current password and you can delete your account.
 
 
 
-# Build with
+## Build with
 
 **Back end**:   Go Language
 

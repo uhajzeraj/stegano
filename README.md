@@ -23,7 +23,7 @@ The main service we offer is Steganography. The other services offered are Caesa
 
 ### Total work hours dedicated to the project cumulatively by the group
 
-Total of 96 hours of work.
+Total of 100 hours of work.
 
 
 
